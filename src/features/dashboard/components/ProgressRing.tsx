@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import Animated, {
   useSharedValue,
@@ -82,7 +82,20 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
         />
 
         {/* Animated Neon Lime Progress Ring */}
-        <AnimatedCircle
+        {Platform.OS === 'web' ? (
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="url(#limeGradient)"
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={circumference * (1 - progress)}
+            strokeLinecap="round"
+            fill="none"
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          />
+        ) : <AnimatedCircle
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -94,7 +107,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           fill="none"
           rotation="-90"
           origin={`${size / 2}, ${size / 2}`}
-        />
+        />}
       </Svg>
 
       {/* Center Metrics Display */}
