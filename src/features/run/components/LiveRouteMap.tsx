@@ -3,7 +3,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import { StyleSheet, View, Platform, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import MapView, { Polyline, Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import { palette } from '../../../theme/tokens';
 import type { LocationPoint } from '../../../types/run';
