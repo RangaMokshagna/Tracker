@@ -5,7 +5,6 @@
 import React, { useState } from 'react';
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -15,6 +14,7 @@ import {
   View,
   Share,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, GlassCard, Text, OfflineBanner } from '../../components/ui';
 import { palette } from '../../theme/tokens';
 import { useAuthStore } from '../../store/auth';

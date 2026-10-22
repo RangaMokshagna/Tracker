@@ -5,12 +5,12 @@
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   View,
   RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Text, EmptyState, OfflineBanner } from '../../components/ui';
 import { palette } from '../../theme/tokens';

@@ -2,23 +2,38 @@
  * STRIDE — Push & Local Notification Service
  */
 
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 
-// Configure notification presentation
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    priority: Notifications.AndroidNotificationPriority.HIGH,
-  }),
-});
+type NotificationsModule = typeof import('expo-notifications');
+let notificationsPromise: Promise<NotificationsModule> | undefined;
+
+async function getNotifications(): Promise<NotificationsModule | null> {
+  // SDK 57's notifications entry point requires native modules absent in Expo Go.
+  // Check before importing it, so onboarding can still load in Expo Go and on web.
+  if (Platform.OS === 'web' || Constants.executionEnvironment === ExecutionEnvironment.StoreClient) {
+    return null;
+  }
+  notificationsPromise ??= import('expo-notifications').then((Notifications) => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      }),
+    });
+    return Notifications;
+  });
+  return notificationsPromise;
+}
 
 export async function requestNotificationPermission(): Promise<boolean> {
   try {
+    const Notifications = await getNotifications();
+    if (!Notifications) return false;
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
@@ -37,6 +52,8 @@ export async function scheduleDailyMotivation(hour = 7, minute = 30): Promise<st
   if (!granted) return null;
 
   try {
+    const Notifications = await getNotifications();
+    if (!Notifications) return null;
     // Cancel existing motivations
     await Notifications.cancelAllScheduledNotificationsAsync();
 
@@ -73,6 +90,8 @@ export async function scheduleDailyMotivation(hour = 7, minute = 30): Promise<st
 
 export async function sendInstantMilestoneAlert(title: string, body: string): Promise<void> {
   try {
+    const Notifications = await getNotifications();
+    if (!Notifications) return;
     await Notifications.scheduleNotificationAsync({
       content: {
         title,

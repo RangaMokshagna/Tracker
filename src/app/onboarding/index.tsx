@@ -4,13 +4,13 @@
 
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button, GlassCard, Text } from '../../components/ui';
 import { palette } from '../../theme/tokens';

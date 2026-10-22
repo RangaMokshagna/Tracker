@@ -4,7 +4,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -14,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlassCard, Text, OfflineBanner } from '../../components/ui';
 import { palette } from '../../theme/tokens';
 import { useAuthStore } from '../../store/auth';
