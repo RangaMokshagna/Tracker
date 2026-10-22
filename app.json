@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "STRIDE",
+    "slug": "stride",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "stride",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.stride.running",
+      "infoPlist": {
+        "UIBackgroundModes": ["location", "fetch"],
+        "NSLocationWhenInUseUsageDescription": "STRIDE requires GPS access to track your live distance, pace, and route accurately during your runs.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "STRIDE requires background location permissions to log your run continuous route and pace metrics even when your phone is locked in your pocket.",
+        "NSMotionUsageDescription": "STRIDE uses motion sensors to track cadence, steps, and calibrate run metrics."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0A0A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.stride.running",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "ACTIVITY_RECOGNITION",
+        "POST_NOTIFICATIONS",
+        "WAKE_LOCK",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-font",
+      "expo-splash-screen",
+      "expo-status-bar",
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "STRIDE tracks your running route and metrics in the background when your phone is locked."
+        }
+      ]
+    ]
+  }
+}
