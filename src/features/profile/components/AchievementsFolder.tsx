@@ -41,6 +41,7 @@ function FolderArtwork({ badges }: { badges: readonly BadgeItem[] }) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
+      <View style={styles.groundShadow} />
       <View style={styles.folderBack} />
       {previews.map((badge, index) => (
         <View
@@ -48,9 +49,9 @@ function FolderArtwork({ badges }: { badges: readonly BadgeItem[] }) {
           style={[
             styles.preview,
             {
-              left: 13 + index * 27,
-              top: index === 1 ? 3 : 14,
-              transform: [{ rotate: `${(index - 1) * 16}deg` }],
+              left: 15 + index * 25,
+              top: index === 1 ? 4 : 15,
+              transform: [{ rotate: `${(index - 1) * 13}deg` }],
             },
           ]}
         >
@@ -65,23 +66,23 @@ function FolderArtwork({ badges }: { badges: readonly BadgeItem[] }) {
       <Svg style={styles.folderFront} width="132" height="104" viewBox="0 0 132 104">
         <Defs>
           <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-            <Stop stopColor="#B9E8DA" stopOpacity="0.68" />
-            <Stop offset="0.48" stopColor="#72B6A5" stopOpacity="0.56" />
-            <Stop offset="1" stopColor="#304F50" stopOpacity="0.92" />
+            <Stop stopColor="#B9E8DA" stopOpacity="0.84" />
+            <Stop offset="0.48" stopColor="#72B6A5" stopOpacity="0.78" />
+            <Stop offset="1" stopColor="#304F50" stopOpacity="0.97" />
           </LinearGradient>
         </Defs>
         <Path
-          d="M5 15 Q4 5 15 7 L45 11 Q49 12 52 17 L56 22 L117 27 Q128 28 126 40 L119 89 Q118 101 105 99 L24 86 Q13 85 12 74Z"
+          d="M7 20 Q6 10 17 12 L116 29 Q126 31 125 42 L119 88 Q118 99 107 97 L25 83 Q15 81 14 71Z"
           fill={`url(#${id})`}
           stroke="#D9F2E8"
-          strokeOpacity="0.44"
+          strokeOpacity="0.64"
           strokeWidth="1.2"
         />
         <Path
-          d="M17 14 L43 18 L53 28 L116 34"
+          d="M17 17 L115 34 Q120 35 120 42"
           fill="none"
           stroke="#E5F5E9"
-          strokeOpacity="0.36"
+          strokeOpacity="0.6"
           strokeWidth="1.4"
           strokeLinecap="round"
         />
@@ -164,13 +165,22 @@ const styles = StyleSheet.create({
   open: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 13 },
   openText: { fontSize: 11, lineHeight: 16, color: palette.lime },
   artwork: { width: 132, height: 126 },
+  groundShadow: {
+    position: 'absolute',
+    left: 22,
+    right: 10,
+    bottom: 0,
+    height: 12,
+    borderRadius: 50,
+    backgroundColor: 'rgba(5,17,22,0.3)',
+  },
   folderBack: {
     position: 'absolute',
     left: 11,
     right: 6,
     top: 27,
     bottom: 14,
-    backgroundColor: '#47796E',
+    backgroundColor: '#3B655E',
     borderRadius: 16,
     transform: [{ rotate: '-7deg' }],
     borderWidth: 1,
@@ -179,21 +189,26 @@ const styles = StyleSheet.create({
   preview: {
     position: 'absolute',
     width: 52,
-    height: 73,
+    height: 77,
+    paddingTop: 12,
+    shadowColor: '#07151B',
+    shadowOpacity: 0.24,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
     borderRadius: 10,
-    backgroundColor: '#223A40',
+    backgroundColor: '#192D34',
     borderWidth: 1,
     borderColor: 'rgba(185,232,218,0.35)',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 9,
+    justifyContent: 'flex-start',
+    gap: 8,
   },
   previewLine: { width: 21, height: 2, borderRadius: 2, backgroundColor: 'rgba(185,232,218,0.36)' },
   folderFront: { position: 'absolute', left: 0, bottom: 0 },
   folderSeal: {
     position: 'absolute',
-    left: 25,
-    bottom: 24,
+    left: 26,
+    bottom: 25,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
