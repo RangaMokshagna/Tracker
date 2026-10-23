@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  Image,
+  useWindowDimensions,
   ScrollView,
   StyleSheet,
   View,
@@ -71,6 +73,9 @@ function TidalLandscape() {
 
 export default function DashboardScreen(): React.JSX.Element {
   const router = useRouter();
+  const viewport = useWindowDimensions();
+  const headerWidth = Math.min(viewport.width, 620) - 44;
+  const headingSize = Math.max(23, Math.min(37, headerWidth * 0.077));
   const haptics = useHaptics();
   const { profile, initialize: initAuth } = useAuthStore();
   const {
@@ -97,19 +102,17 @@ export default function DashboardScreen(): React.JSX.Element {
       await Promise.all([initAuth(), initGoals()]);
       const runs = await getRecentRuns(100);
       setRecentRuns(
-        runs
-          .slice(0, 3)
-          .map((run) => ({
-            id: run.id,
-            date: new Date(run.startedAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            }),
-            distanceMeters: run.distanceMeters,
-            durationSeconds: run.durationSeconds,
-            avgPaceSecondsPerKm: run.avgPace || 0,
-            caloriesBurned: run.caloriesBurned || 0,
-          })),
+        runs.slice(0, 3).map((run) => ({
+          id: run.id,
+          date: new Date(run.startedAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          }),
+          distanceMeters: run.distanceMeters,
+          durationSeconds: run.durationSeconds,
+          avgPaceSecondsPerKm: run.avgPace || 0,
+          caloriesBurned: run.caloriesBurned || 0,
+        })),
       );
       const now = new Date();
       const monday = new Date(
@@ -182,17 +185,35 @@ export default function DashboardScreen(): React.JSX.Element {
           </TouchableOpacity>
         </View>
         <View style={styles.greeting}>
-          <Text color="textSecondary" variant="bodySmall">
-            {new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </Text>
-          <Text style={styles.title}>A little further.{'\n'}A little more you.</Text>
-          <Text color="textSecondary" style={styles.subtitle}>
-            Your space to move, {firstName}.
-          </Text>
+          <View style={styles.greetingCopy}>
+            <Text color="textSecondary" variant="bodySmall">
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </Text>
+            <Text style={[styles.title, { fontSize: headingSize, lineHeight: headingSize * 1.18 }]}>
+              A little further.{'\n'}A little more you.
+            </Text>
+            <Text color="textSecondary" style={styles.subtitle}>
+              Your space to move, {firstName}.
+            </Text>
+          </View>
+          <View
+            pointerEvents="none"
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={[styles.runnerArtwork, { width: Math.min(148, headerWidth * 0.28) }]}
+          >
+            <Image
+              source={require('../../../assets/runner-seaglass.png')}
+              resizeMode="contain"
+              style={styles.runnerImage}
+              accessible={false}
+            />
+          </View>
         </View>
         <GlassCard style={styles.hero}>
           <View style={styles.heroHeader}>
@@ -350,7 +371,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: { color: palette.lime, fontSize: 18, fontWeight: '500' },
-  greeting: { paddingTop: 26, paddingBottom: 24 },
+  greeting: {
+    paddingTop: 26,
+    paddingBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  greetingCopy: { flex: 1, minWidth: 0 },
+  runnerArtwork: { aspectRatio: 0.9 },
+  runnerImage: { width: '100%', height: '100%', opacity: 0.8 },
   title: { fontSize: 37, lineHeight: 42, fontWeight: '400', letterSpacing: -1.5, marginTop: 10 },
   subtitle: { fontSize: 14, marginTop: 12 },
   hero: { padding: 22, minHeight: 320, backgroundColor: 'rgba(35, 58, 63, 0.7)', borderRadius: 32 },
