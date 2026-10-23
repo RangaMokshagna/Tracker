@@ -48,6 +48,8 @@ export interface LiquidGlassDockProps {
 const SPRING = { stiffness: 300, damping: 25, mass: 1 };
 const HEIGHT = 76;
 const CONTENT_INSET = 6;
+// Extra end space keeps the wider capsule centered on the first and last icons.
+const HORIZONTAL_INSET = 22;
 const LENS_HEIGHT = 64;
 const BLUR = 55; // Native blur strength. Web blur and saturation are in the scoped CSS below.
 const clamp = (value: number, min: number, max: number) => {
@@ -59,8 +61,8 @@ const clamp = (value: number, min: number, max: number) => {
 export function dockGeometry(width: number, count: number, index: number, labelWidth: number) {
   if (width <= 8 || count <= 0) return { center: 0, width: 0, cell: 0 };
   const cell = width / Math.max(1, count);
-  const lensWidth = Math.min(Math.max(0, width - 8), cell * 1.3, Math.max(60, labelWidth + 34));
-  const center = clamp(cell * (index + 0.5), lensWidth / 2 + 4, width - lensWidth / 2 - 4);
+  const lensWidth = Math.min(width, cell * 1.5, cell + 32, Math.max(94, labelWidth + 60));
+  const center = cell * (clamp(index, 0, count - 1) + 0.5);
   return { center, width: lensWidth, cell };
 }
 export function nearestDockTab(center: number, width: number, count: number) {
@@ -201,7 +203,7 @@ function DockCell({
         style={[styles.cellContent, scaling]}
       >
         <Animated.View style={[styles.glyphLayer, inactiveStyle]}>
-          {tab.icon({ color: colors.inactive, size: 23, selected: false })}
+          {tab.icon({ color: colors.inactive, size: 28, selected: false })}
           <Text
             numberOfLines={1}
             maxFontSizeMultiplier={1.3}
@@ -212,7 +214,7 @@ function DockCell({
           </Text>
         </Animated.View>
         <Animated.View style={[styles.glyphLayer, activeStyle]}>
-          {tab.icon({ color: colors.active, size: 23, selected: true })}
+          {tab.icon({ color: colors.active, size: 28, selected: true })}
           <Text
             numberOfLines={1}
             maxFontSizeMultiplier={1.3}
@@ -243,7 +245,7 @@ export function LiquidGlassDock({
   const [labels, setLabels] = useState<Record<string, number>>({});
   const [focusId, setFocusId] = useState(activeId);
   const center = useSharedValue(0);
-  const lensWidth = useSharedValue(64);
+  const lensWidth = useSharedValue(94);
   const stretch = useSharedValue(1);
   const fade = useSharedValue(1);
   const initialized = useRef(false);
@@ -317,11 +319,7 @@ export function LiquidGlassDock({
     stretch.set(reduced ? 1 : withTiming(1.08, { duration: 80 }));
   };
   const moveDrag = (dx: number) => {
-    const next = clamp(
-      dragStart.current + dx,
-      4 + lensWidth.get() / 2,
-      width - 4 - lensWidth.get() / 2,
-    );
+    const next = clamp(dragStart.current + dx, cell / 2, width - cell / 2);
     center.set(next);
     const index = nearestDockTab(next, width, tabs.length);
     if (index !== dragIndex.current) {
@@ -402,7 +400,7 @@ export function LiquidGlassDock({
     (cells.current[tabs[next].id] as (View & { focus?: () => void }) | null)?.focus?.();
   };
   const lensStyle = useAnimatedStyle(() => ({
-    left: CONTENT_INSET + center.value - lensWidth.value / 2,
+    left: HORIZONTAL_INSET - 1 + center.value - lensWidth.value / 2,
     width: lensWidth.value,
     opacity: fade.value,
     transform: [
@@ -553,7 +551,8 @@ const styles = StyleSheet.create({
   },
   surface: {
     height: HEIGHT,
-    padding: CONTENT_INSET - 1,
+    paddingVertical: CONTENT_INSET - 1,
+    paddingHorizontal: HORIZONTAL_INSET - 1,
     borderRadius: 9999,
     backgroundColor: 'transparent',
     borderWidth: 1,
@@ -571,7 +570,7 @@ const styles = StyleSheet.create({
   },
   row: { height: LENS_HEIGHT, flexDirection: 'row', alignSelf: 'stretch', zIndex: 2 },
   cell: { height: LENS_HEIGHT, alignItems: 'center', justifyContent: 'center', minWidth: 0 },
-  cellContent: { width: '100%', height: 50 },
+  cellContent: { width: '100%', height: 56 },
   glyphLayer: {
     position: 'absolute',
     left: 0,
@@ -580,9 +579,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 5,
   },
-  label: { fontSize: 11, lineHeight: 15, letterSpacing: -0.1, fontWeight: '500' },
+  label: { fontSize: 12, lineHeight: 17, letterSpacing: -0.1, fontWeight: '500' },
   lens: {
     position: 'absolute',
     top: CONTENT_INSET - 1,
