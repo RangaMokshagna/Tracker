@@ -41,7 +41,7 @@
                                                 ▼
                              ┌──────────────────────────────────────┐
                              │   Supabase Edge Functions (Deno)     │
-                             │  Secure Claude 3.5 Sonnet Integration│
+                             │  Local Coach + optional Gemini server│
                              │  (API keys never exposed to client)  │
                              └──────────────────────────────────────┘
 ```
@@ -62,7 +62,7 @@
   - Supabase Postgres (Cloud backup with Row-Level Security)
   - NetInfo background sync queue
 - **AI Engine:**
-  - Claude 3.5 Sonnet called securely via backend edge functions with strict safety disclaimers, rate limiting, and prompt-injection defense
+  - Free offline rules and bundled plans; optional server-only Gemini Flash chat with quotas, caching and local fallbacks
 
 ---
 
@@ -85,12 +85,12 @@
    - Period selector: Week, Month, All Time
    - Aggregate volume, avg pace, and calorie statistics
    - Detailed session view with full polyline map, kilometer split breakdown table, and AI post-run analysis
-4. **AI Coach (`/coach`)**
-   - Context-aware chat with access to runner's real metrics, streak, and volume
-   - Instant prompt pills: *"Analyze my week"*, *"Build next week's plan"*, *"Am I at risk of injury?"*
-   - Smart 7-day training schedule generator
-   - Injury-risk nudge (warns when mileage spikes > 10% over 4-week baseline)
-   - Persistent medical disclaimer
+4. **Free Coach (`/coach`)**
+   - Offline insights from actual saved runs, recovery patterns, splits and recorded bests
+   - Six bundled 4–8 week plans, today's workout, check-offs and weekly progress
+   - Optional Gemini chat through a server-only proxy; disabled by default
+   - Per-user quotas, persistent caching, streaming and prepared offline answers
+   - General guidance only; no injury diagnoses or paid-model dependency
 5. **Runner Profile & Settings (`/profile`)**
    - Instant Km vs Miles unit preference toggle
    - Biometrics calibration (Weight, Height)
@@ -151,20 +151,10 @@ Execute the SQL script located at `supabase/schema.sql` in your Supabase SQL Edi
 - Enables Row Level Security (RLS) policies so runners only access their own data
 - Sets up automated updated_at triggers and streak tracking
 
-### 2. Deploying AI Edge Functions
-Install Supabase CLI and deploy the Claude API proxy edge functions:
-```bash
-supabase login
-supabase link --project-ref your-project-id
+### 2. Free offline Coach and optional Gemini
+The Coach tab uses local rules and bundled JSON plans, without paid AI. Optional free-tier Gemini chat runs only through the separate Node backend, disabled by default.
 
-# Set your Anthropic API Key securely on the backend (NEVER in the mobile app)
-supabase secrets set ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
-
-# Deploy the edge functions
-supabase functions deploy coach-chat
-supabase functions deploy post-run-insight
-supabase functions deploy weekly-plan
-```
+See [Coach setup, environment variables and tests](docs/coach-README.md). The old Supabase proxies are retired; no provider key belongs in the mobile app.
 
 ---
 

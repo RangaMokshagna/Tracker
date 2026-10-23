@@ -32,23 +32,49 @@ export const PostRunModal: React.FC<PostRunModalProps> = ({
   onDiscard,
 }) => {
   const { styles, colors } = useStyles();
-  const [insight, setInsight] = useState<PostRunInsight | null>(null);
-  const [loadingInsight, setLoadingInsight] = useState(true);
+  const [resolved, setResolved] = useState<{
+    key: string;
+    insight: PostRunInsight;
+  } | null>(null);
+  const summaryKey = JSON.stringify([
+    stats.distanceMeters,
+    stats.durationSeconds,
+    stats.avgPaceSecondsPerKm,
+    stats.bestPaceSecondsPerKm,
+    stats.splits,
+  ]);
+  const insight = resolved?.key === summaryKey ? resolved.insight : null;
+  const loadingInsight = !insight;
 
   useEffect(() => {
+    let cancelled = false;
     if (visible && stats.distanceMeters > 0) {
-      setLoadingInsight(true);
       generatePostRunInsight({
         distanceMeters: stats.distanceMeters,
         durationSeconds: stats.durationSeconds,
         avgPaceSecondsPerKm: stats.avgPaceSecondsPerKm,
         splitsCount: stats.splits.length,
         bestPaceSecondsPerKm: stats.bestPaceSecondsPerKm,
-      })
-        .then((res) => setInsight(res))
-        .finally(() => setLoadingInsight(false));
+        splits: stats.splits.map((split) => ({
+          distanceKm: split.distanceMeters / 1000,
+          durationMin: split.durationSeconds / 60,
+        })),
+      }).then((result) => {
+        if (!cancelled) setResolved({ key: summaryKey, insight: result });
+      });
     }
-  }, [visible, stats.distanceMeters]);
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    visible,
+    summaryKey,
+    stats.distanceMeters,
+    stats.durationSeconds,
+    stats.avgPaceSecondsPerKm,
+    stats.bestPaceSecondsPerKm,
+    stats.splits,
+  ]);
 
   if (!visible) return null;
 
@@ -128,7 +154,7 @@ export const PostRunModal: React.FC<PostRunModalProps> = ({
             <View style={styles.aiHeader}>
               <Sparkles size={18} color={palette.lime} />
               <Text variant="label" color="lime" style={styles.aiTitle}>
-                AI COACH 3-LINE ANALYSIS
+                YOUR OFFLINE COACH
               </Text>
             </View>
 
@@ -138,7 +164,7 @@ export const PostRunModal: React.FC<PostRunModalProps> = ({
                 color="dark300"
                 style={styles.loadingAi}
               >
-                Synthesizing pace dynamics & recovery metrics...
+                Reading your saved run history?
               </Text>
             ) : (
               <View style={styles.insightLines}>
