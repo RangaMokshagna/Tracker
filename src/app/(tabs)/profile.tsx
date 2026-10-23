@@ -4,6 +4,8 @@ import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
  */
 
 import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { AchievementsFolder } from '../../features/profile/components/AchievementsFolder';
 import {
   Alert,
   ScrollView,
@@ -25,28 +27,21 @@ import { useHaptics } from '../../hooks/useHaptics';
 import { getAllRuns } from '../../services/sqlite';
 import { formatDistance } from '../../utils/distance';
 import { formatDuration } from '../../utils/format';
-import {
-  User,
-  Settings,
-  Trophy,
-  Flame,
-  Download,
-  Trash2,
-  Moon,
-  Bell,
-  Scale,
-  Ruler,
-  Check,
-} from 'lucide-react-native';
+import { User, Trophy, Download, Trash2, Moon, Bell, Scale, Ruler } from 'lucide-react-native';
 
 export default function ProfileScreen(): React.JSX.Element {
   const haptics = useHaptics();
+  const router = useRouter();
   const { profile, updateProfile, setUnitPreference, deleteAccount } = useAuthStore();
-  const { badges, personalRecords, dailyGoalMeters, weeklyGoalMeters, setDailyGoal, setWeeklyGoal } = useGoalsStore();
+  const { badges, personalRecords } = useGoalsStore();
   const { colorScheme, toggle: toggleTheme } = useThemeStore();
 
-  const [weightInput, setWeightInput] = useState(profile.weightKg ? String(profile.weightKg) : '70');
-  const [heightInput, setHeightInput] = useState(profile.heightCm ? String(profile.heightCm) : '178');
+  const [weightInput, setWeightInput] = useState(
+    profile.weightKg ? String(profile.weightKg) : '70',
+  );
+  const [heightInput, setHeightInput] = useState(
+    profile.heightCm ? String(profile.heightCm) : '178',
+  );
   const [nameInput, setNameInput] = useState(profile.displayName || 'Alex Mercer');
   const [isEditingBio, setIsEditingBio] = useState(false);
 
@@ -70,12 +65,16 @@ export default function ProfileScreen(): React.JSX.Element {
     haptics.light();
     try {
       const runs = await getAllRuns();
-      const exportJson = JSON.stringify({ profile, runs, exportDate: new Date().toISOString() }, null, 2);
+      const exportJson = JSON.stringify(
+        { profile, runs, exportDate: new Date().toISOString() },
+        null,
+        2,
+      );
       await Share.share({
         title: 'STRIDE_Export_Data.json',
         message: exportJson,
       });
-    } catch (e) {
+    } catch {
       Alert.alert('Export Error', 'Unable to export data.');
     }
   };
@@ -96,7 +95,7 @@ export default function ProfileScreen(): React.JSX.Element {
             Alert.alert('Account Cleared', 'All your local and cloud data has been deleted.');
           },
         },
-      ]
+      ],
     );
   };
 
@@ -136,6 +135,14 @@ export default function ProfileScreen(): React.JSX.Element {
             </View>
           </View>
         </GlassCard>
+
+        <AchievementsFolder
+          badges={badges}
+          onPress={() => {
+            haptics.light();
+            router.push('/achievements');
+          }}
+        />
 
         {/* Unit Preference & Biometrics */}
         <GlassCard variant="default" style={styles.sectionCard}>
@@ -284,31 +291,6 @@ export default function ProfileScreen(): React.JSX.Element {
           </View>
         </GlassCard>
 
-        {/* Badges Earned */}
-        <GlassCard variant="default" style={styles.sectionCard}>
-          <Text variant="label" color="white" style={styles.sectionLabel}>
-            ACHIEVEMENTS & BADGES
-          </Text>
-          <View style={styles.badgesGrid}>
-            {badges.map((b) => (
-              <View
-                key={b.id}
-                style={[styles.badgeItem, !b.unlockedAt && styles.badgeLocked]}
-              >
-                <Text style={styles.badgeEmoji}>{b.icon}</Text>
-                <Text
-                  variant="caption"
-                  color={b.unlockedAt ? 'white' : 'dark400'}
-                  style={styles.badgeName}
-                  numberOfLines={1}
-                >
-                  {b.name}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </GlassCard>
-
         {/* App Settings */}
         <GlassCard variant="default" style={styles.sectionCard}>
           <Text variant="label" color="white" style={styles.sectionLabel}>
@@ -378,7 +360,8 @@ export default function ProfileScreen(): React.JSX.Element {
         <View style={styles.footer}>
           <Text variant="caption" color="dark400" style={styles.footerText}>
             STRIDE v1.0.0 (Build 1) • Apple HIG & Nike Run Club Inspired{'\n'}
-            Medical Disclaimer: Fitness guidance only. Consult a physician before starting any training regime.
+            Medical Disclaimer: Fitness guidance only. Consult a physician before starting any
+            training regime.
           </Text>
         </View>
       </ScrollView>
@@ -521,29 +504,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#FFFFFF',
     marginTop: 4,
-  },
-  badgesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  badgeItem: {
-    width: '30%',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-  },
-  badgeLocked: {
-    opacity: 0.35,
-  },
-  badgeEmoji: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  badgeName: {
-    fontSize: 10,
-    textAlign: 'center',
   },
   actionRow: {
     paddingVertical: 6,
