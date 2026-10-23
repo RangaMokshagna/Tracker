@@ -66,6 +66,15 @@ export default function RootLayout(): React.JSX.Element {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
+          name="achievements"
+          options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
+            animation: 'none',
+            contentStyle: { backgroundColor: 'transparent' },
+          }}
+        />
+        <Stack.Screen
           name="run-setup"
           options={{ animation: 'fade_from_bottom', animationDuration: 350 }}
         />

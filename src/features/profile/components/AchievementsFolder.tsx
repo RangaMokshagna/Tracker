@@ -1,35 +1,24 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { useFolderTransition } from './AchievementDeck';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { ArrowUpRight, Flame, Footprints, Trophy, Zap } from 'lucide-react-native';
+import { ArrowUpRight } from 'lucide-react-native';
 import { Text } from '../../../components/ui';
 import { GlassSheen } from '../../../components/ui/LiquidBackdrop';
 import { palette } from '../../../theme/tokens';
 import type { BadgeItem } from '../../../store/goals';
 
-export function BadgeGlyph({
-  category,
-  size = 24,
-  color = palette.lime,
-}: {
-  category: BadgeItem['category'];
-  size?: number;
-  color?: string;
-}) {
-  const Icon =
-    category === 'streak'
-      ? Flame
-      : category === 'pace'
-        ? Zap
-        : category === 'distance'
-          ? Footprints
-          : Trophy;
-  return <Icon size={size} color={color} strokeWidth={1.6} />;
-}
+export { BadgeGlyph } from './BadgeGlyph';
 
 /** Transparent glass folder artwork matched to the supplied achievements reference. */
-function FolderArtwork() {
+function FolderArtwork({
+  artworkRef,
+}: {
+  artworkRef: React.RefObject<React.ComponentRef<typeof View> | null>;
+}) {
   return (
     <View
+      ref={artworkRef}
+      collapsable={false}
       style={styles.artwork}
       pointerEvents="none"
       accessibilityElementsHidden
@@ -53,9 +42,18 @@ export function AchievementsFolder({
   onPress: () => void;
 }) {
   const earned = badges.filter((badge) => badge.unlockedAt).length;
+  const artworkRef = useRef<React.ComponentRef<typeof View>>(null);
+  const open = () => {
+    if (artworkRef.current)
+      artworkRef.current.measureInWindow((x, y, width, height) => {
+        useFolderTransition.getState().setOrigin({ x, y, width, height });
+        onPress();
+      });
+    else onPress();
+  };
   return (
     <Pressable
-      onPress={onPress}
+      onPress={open}
       accessibilityRole="button"
       accessibilityLabel={`Open achievements. ${earned} of ${badges.length} badges earned.`}
       accessibilityHint="Opens your badge collection"
@@ -75,7 +73,7 @@ export function AchievementsFolder({
           <ArrowUpRight size={14} color={palette.lime} />
         </View>
       </View>
-      <FolderArtwork />
+      <FolderArtwork artworkRef={artworkRef} />
     </Pressable>
   );
 }
