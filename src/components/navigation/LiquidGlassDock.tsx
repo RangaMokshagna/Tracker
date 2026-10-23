@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
   PanResponder,
@@ -14,11 +14,11 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import Animated, {
   cancelAnimation,
   interpolate,
   useAnimatedStyle,
-  useDerivedValue,
   useReducedMotion,
   useSharedValue,
   withSequence,
@@ -26,7 +26,6 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import type { SkImage } from '@shopify/react-native-skia';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface LiquidGlassTab {
@@ -41,16 +40,16 @@ export interface LiquidGlassDockProps {
   onChange: (id: string) => void;
   /** Android's BlurTargetView ref; omit to use the solid frosted fallback. */
   blurTarget?: React.RefObject<View | null>;
+  appearance?: 'light' | 'dark';
   style?: StyleProp<ViewStyle>;
 }
 
 // TWEAK: physics, optical treatment, and colors are centralized here.
 const SPRING = { stiffness: 300, damping: 25, mass: 1 };
-const BLUE = '#007AFF';
-const INK = '#202126';
-const HEIGHT = 74;
+const HEIGHT = 76;
+const CONTENT_INSET = 6;
 const LENS_HEIGHT = 64;
-const BLUR = 100; // expo-blur web: 100 → 20px blur + 180% saturation.
+const BLUR = 55; // Native blur strength. Web blur and saturation are in the scoped CSS below.
 const clamp = (value: number, min: number, max: number) => {
   'worklet';
   return Math.min(max, Math.max(min, value));
@@ -73,6 +72,18 @@ export function dockCoverage(center: number, cell: number, index: number) {
   'worklet';
   if (cell <= 0) return 0;
   return clamp(1 - Math.abs(center - cell * (index + 0.5)) / (cell * 0.85), 0, 1);
+}
+
+export function sameDockTarget(
+  previous: { center: number; width: number; reduced: boolean },
+  next: { center: number; width: number },
+  reduced: boolean,
+) {
+  return (
+    previous.reduced === reduced &&
+    Math.abs(previous.center - next.center) < 0.1 &&
+    Math.abs(previous.width - next.width) < 0.1
+  );
 }
 
 function useMotionPreference() {
@@ -99,259 +110,150 @@ function useMotionPreference() {
   return reduced;
 }
 
-type CellProps = {
-  tab: LiquidGlassTab;
-  index: number;
-  cell: number;
-  center: SharedValue<number>;
-  blue?: boolean;
-  reduced: boolean;
-  active: boolean;
-  focused: boolean;
-  onPress: () => void;
-  onFocus: () => void;
-  onMeasure?: (width: number) => void;
-  buttonRef?: (view: View | null) => void;
-};
+type DockColors = { inactive: string; active: string; dark: boolean };
+const DARK: DockColors = { inactive: '#E4EEF4', active: '#71C5FF', dark: true };
+const LIGHT: DockColors = { inactive: '#25313D', active: '#006BE6', dark: false };
+
+/** Gloss only affects the glass surface. Text and glyphs stay in the stationary foreground. */
+function Gloss({ lens = false }: { lens?: boolean }) {
+  const id = `glass-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  return (
+    <View
+      pointerEvents="none"
+      aria-hidden
+      accessibilityElementsHidden
+      style={StyleSheet.absoluteFill}
+    >
+      <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 76">
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2="0.8" y2="1">
+            <Stop stopColor="#FFFFFF" stopOpacity={lens ? 0.24 : 0.16} />
+            <Stop offset="0.38" stopColor="#FFFFFF" stopOpacity="0.015" />
+            <Stop offset="0.7" stopColor="#D7EDFF" stopOpacity={lens ? 0.05 : 0.02} />
+            <Stop offset="1" stopColor="#FFFFFF" stopOpacity={lens ? 0.12 : 0.07} />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0.5" y="0.5" width="399" height="75" rx="38" fill={`url(#${id})`} />
+      </Svg>
+    </View>
+  );
+}
+
 function DockCell({
   tab,
   index,
   cell,
   center,
-  blue = false,
   reduced,
+  colors,
   active,
   focused,
-  onPress,
+  onSelect,
   onFocus,
   onMeasure,
   buttonRef,
-}: CellProps) {
+}: {
+  tab: LiquidGlassTab;
+  index: number;
+  cell: number;
+  center: SharedValue<number>;
+  reduced: boolean;
+  colors: DockColors;
+  active: boolean;
+  focused: boolean;
+  onSelect: () => void;
+  onFocus: () => void;
+  onMeasure: (width: number) => void;
+  buttonRef: (view: View | null) => void;
+}) {
   const pressed = useSharedValue(1);
-  const animated = useAnimatedStyle(() => {
-    const coverage = dockCoverage(center.value, cell, index);
-    return {
-      opacity: blue ? 1 : 1 - coverage,
-      transform: [{ scale: pressed.value * (reduced ? 1 : 1 + coverage * 0.065) }],
-    };
-  });
-  const content = (
-    <>
-      {tab.icon({ color: blue ? BLUE : INK, size: 24, selected: blue })}
-      <Text
-        numberOfLines={1}
-        onLayout={onMeasure ? (e) => onMeasure(e.nativeEvent.layout.width) : undefined}
-        style={[styles.label, { color: blue ? BLUE : INK, fontWeight: blue ? '600' : '500' }]}
-      >
-        {tab.label}
-      </Text>
-    </>
-  );
-  if (blue)
-    return (
-      <Animated.View style={[styles.cell, { width: cell }, animated]}>{content}</Animated.View>
-    );
+  const scaling = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: pressed.value * (reduced ? 1 : 1 + dockCoverage(center.value, cell, index) * 0.035),
+      },
+    ],
+  }));
+  const inactiveStyle = useAnimatedStyle(() => ({
+    opacity: 1 - dockCoverage(center.value, cell, index),
+  }));
+  const activeStyle = useAnimatedStyle(() => ({
+    opacity: dockCoverage(center.value, cell, index),
+  }));
   return (
     <Pressable
       ref={buttonRef}
-      onPress={onPress}
+      onPress={onSelect}
       onFocus={onFocus}
       accessibilityRole="tab"
       accessibilityLabel={tab.label}
       accessibilityState={{ selected: active }}
       nativeID={`liquid-tab-${tab.id}`}
       tabIndex={focused ? 0 : -1}
-      onPressIn={() => pressed.set(reduced ? 1 : withTiming(0.95, { duration: 80 }))}
-      onPressOut={() => pressed.set(withTiming(1, { duration: 140 }))}
       style={[styles.cell, { width: cell }]}
+      onPressIn={() => pressed.set(reduced ? 1 : withTiming(0.95, { duration: 80 }))}
+      onPressOut={() => pressed.set(withTiming(1, { duration: 120 }))}
     >
-      <Animated.View style={[styles.cellContent, animated]}>{content}</Animated.View>
+      <Animated.View
+        pointerEvents="none"
+        aria-hidden
+        accessibilityElementsHidden
+        style={[styles.cellContent, scaling]}
+      >
+        <Animated.View style={[styles.glyphLayer, inactiveStyle]}>
+          {tab.icon({ color: colors.inactive, size: 23, selected: false })}
+          <Text
+            numberOfLines={1}
+            maxFontSizeMultiplier={1.3}
+            onLayout={(event) => onMeasure(event.nativeEvent.layout.width)}
+            style={[styles.label, { color: colors.inactive }]}
+          >
+            {tab.label}
+          </Text>
+        </Animated.View>
+        <Animated.View style={[styles.glyphLayer, activeStyle]}>
+          {tab.icon({ color: colors.active, size: 23, selected: true })}
+          <Text
+            numberOfLines={1}
+            maxFontSizeMultiplier={1.3}
+            style={[styles.label, { color: colors.active, fontWeight: '600' }]}
+          >
+            {tab.label}
+          </Text>
+        </Animated.View>
+      </Animated.View>
     </Pressable>
   );
 }
 
-// Native SkSL: sample the actual tab row, refract it, and separate color channels in motion.
-// Native Skia is loaded only on native. Web never loads CanvasKit or its WASM runtime.
-const SKSL = `
-uniform shader content;
-uniform float2 size;
-uniform float origin;
-uniform float movement;
-half4 main(float2 p) {
-  float2 n = (p - size * 0.5) / max(size * 0.5, float2(1));
-  float bulge = max(0.0, 1.0 - dot(n,n));
-  float2 uv = float2(origin + p.x, p.y);
-  uv -= n * bulge * (0.45 + 1.8 * movement);
-  uv.x += sin(p.y * 0.18) * movement * 1.6;
-  half4 c = content.eval(uv);
-  half4 a = content.eval(uv + float2(movement * 1.8, 0));
-  half4 b = content.eval(uv - float2(movement * 1.8, 0));
-  return half4(a.r, c.g, b.b, max(c.a, max(a.a, b.a)));
-}`;
-
-function NativeRefraction({
-  sourceRef,
-  rowWidth,
-  center,
-  lensWidth,
-  motion,
-}: {
-  sourceRef: React.RefObject<View | null>;
-  rowWidth: number;
-  center: SharedValue<number>;
-  lensWidth: SharedValue<number>;
-  motion: SharedValue<number>;
-}) {
-  const [snapshot, setSnapshot] = useState<SkImage | null>(null);
-  // Native-only loading prevents CanvasKit/WASM initialization on web.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const skia = require('@shopify/react-native-skia') as typeof import('@shopify/react-native-skia');
-  const [shader] = useState(() => skia.Skia.RuntimeEffect.Make(SKSL));
-  useEffect(() => {
-    let alive = true;
-    // Capture the full, blue row, not a screen image; the enclosing lens clips it on screen.
-    const frame = requestAnimationFrame(() => {
-      if (!sourceRef.current) return;
-      void skia
-        .makeImageFromView(sourceRef)
-        .then((image) => {
-          if (alive) setSnapshot(image);
-        })
-        .catch(() => {
-          /* Live vector row remains as the graceful fallback. */
-        });
-    });
-    return () => {
-      alive = false;
-      cancelAnimationFrame(frame);
-    };
-  }, [sourceRef, rowWidth, skia]);
-  const uniforms = useDerivedValue(() => ({
-    size: [lensWidth.value, LENS_HEIGHT],
-    origin: center.value - lensWidth.value / 2,
-    movement: motion.value,
-  }));
-  const opacity = useAnimatedStyle(() => ({ opacity: snapshot ? motion.value : 0 }));
-  if (!snapshot || !shader) return null;
-  const { Canvas, Fill, Shader, ImageShader } = skia;
-  return (
-    <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, opacity]}>
-      <Canvas style={StyleSheet.absoluteFill}>
-        <Fill>
-          <Shader source={shader} uniforms={uniforms}>
-            <ImageShader
-              image={snapshot}
-              fit="fill"
-              rect={{ x: 0, y: 0, width: rowWidth, height: LENS_HEIGHT }}
-              tx="clamp"
-              ty="clamp"
-            />
-          </Shader>
-        </Fill>
-      </Canvas>
-    </Animated.View>
-  );
-}
-
-// Self-contained browser fallback styles and SVG optical filter definitions.
-function WebOptics({ id }: { id: string }) {
-  if (Platform.OS !== 'web') return null;
-  return (
-    <>
-      {React.createElement(
-        'style',
-        null,
-        `
-      .liquid-glass-dock { background: rgba(255,255,255,.7); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); touch-action:pan-y; user-select:none; -webkit-user-select:none; }
-      .liquid-glass-dock [role=tab]:focus-visible { outline:2px solid #007AFF; outline-offset:-5px; border-radius:9999px; }
-      @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .liquid-glass-dock { background:rgba(255,255,255,.94); } }
-      @media (prefers-reduced-motion:reduce) { .liquid-glass-dock * { scroll-behavior:auto; } }
-    `,
-      )}
-      {React.createElement(
-        'svg',
-        { width: 0, height: 0, 'aria-hidden': true, style: { position: 'absolute' } },
-        React.createElement(
-          'defs',
-          null,
-          React.createElement(
-            'filter',
-            {
-              id,
-              x: '-20%',
-              y: '-30%',
-              width: '140%',
-              height: '160%',
-              colorInterpolationFilters: 'sRGB',
-            },
-            React.createElement('feTurbulence', {
-              type: 'fractalNoise',
-              baseFrequency: '0.018 0.045',
-              numOctaves: 1,
-              seed: 4,
-              result: 'noise',
-            }),
-            React.createElement('feDisplacementMap', {
-              in: 'SourceGraphic',
-              in2: 'noise',
-              scale: 7,
-              xChannelSelector: 'R',
-              yChannelSelector: 'G',
-              result: 'bent',
-            }),
-            React.createElement('feGaussianBlur', {
-              in: 'bent',
-              stdDeviation: '0.45 0.15',
-              result: 'soft',
-            }),
-            React.createElement('feOffset', { in: 'soft', dx: 1.5, result: 'fringe' }),
-            React.createElement('feColorMatrix', {
-              in: 'fringe',
-              type: 'matrix',
-              values: '0.4 0 0 0 0  0 0.8 0 0 0  0 0 1 0 0.05  0 0 0 0.35 0',
-              result: 'blue',
-            }),
-            React.createElement(
-              'feMerge',
-              null,
-              React.createElement('feMergeNode', { in: 'blue' }),
-              React.createElement('feMergeNode', { in: 'soft' }),
-            ),
-          ),
-        ),
-      )}
-    </>
-  );
-}
-
-/** Controlled floating dock. Place after the screen content inside a positioned parent. */
+/** Controlled floating dock. Surface movement never transforms or clips its tab content. */
 export function LiquidGlassDock({
   tabs,
   activeId,
   onChange,
   blurTarget,
+  appearance = 'light',
   style,
 }: LiquidGlassDockProps) {
   const insets = useSafeAreaInsets();
   const viewport = useWindowDimensions();
   const reduced = useMotionPreference();
+  const colors = appearance === 'dark' ? DARK : LIGHT;
   const [width, setWidth] = useState(0);
   const [labels, setLabels] = useState<Record<string, number>>({});
   const [focusId, setFocusId] = useState(activeId);
   const center = useSharedValue(0);
   const lensWidth = useSharedValue(64);
-  const motion = useSharedValue(0);
   const stretch = useSharedValue(1);
   const fade = useSharedValue(1);
   const initialized = useRef(false);
+  const lastTarget = useRef({ center: -1, width: -1, reduced });
   const dragging = useRef(false);
   const dragStart = useRef(0);
   const dragIndex = useRef(-1);
   const webPointer = useRef<{ id: number; x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
   const cells = useRef<Record<string, View | null>>({});
-  const sourceRef = useRef<View>(null);
-  const filterId = `dock-optics-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const activeIndex = Math.max(
     0,
     tabs.findIndex((tab) => tab.id === activeId),
@@ -360,64 +262,59 @@ export function LiquidGlassDock({
   const target = dockGeometry(width, tabs.length, activeIndex, labels[tabs[activeIndex]?.id] ?? 32);
 
   const animateTo = useCallback(
-    (index: number) => {
-      const tab = tabs[index];
-      if (!tab || !width) return;
-      const next = dockGeometry(width, tabs.length, index, labels[tab.id] ?? 32);
+    (next: { center: number; width: number }, force = false) => {
+      if (!width) return;
+      // A route render or a new icon callback must not restart an in-flight spring.
+      if (!force && initialized.current && sameDockTarget(lastTarget.current, next, reduced))
+        return;
+      lastTarget.current = { ...next, reduced };
       cancelAnimation(center);
+      cancelAnimation(lensWidth);
       cancelAnimation(stretch);
-      cancelAnimation(motion);
-      if (reduced || !initialized.current) {
+      if (!initialized.current || reduced) {
         center.set(next.center);
         lensWidth.set(next.width);
-        motion.set(0);
         stretch.set(1);
         fade.set(
-          reduced
-            ? withSequence(withTiming(0.55, { duration: 60 }), withTiming(1, { duration: 100 }))
+          reduced && initialized.current
+            ? withSequence(withTiming(0.65, { duration: 50 }), withTiming(1, { duration: 100 }))
             : 1,
         );
       } else {
-        motion.set(1);
-        stretch.set(withSequence(withTiming(1.22, { duration: 85 }), withSpring(1, SPRING)));
-        center.set(
-          withSpring(next.center, SPRING, (finished) => {
-            if (finished) motion.set(withTiming(0, { duration: 120 }));
-          }),
-        );
+        center.set(withSpring(next.center, SPRING));
         lensWidth.set(withSpring(next.width, SPRING));
+        // TWEAK: only the glass stretches; all labels and glyphs retain their own centers.
+        stretch.set(withSequence(withTiming(1.12, { duration: 75 }), withSpring(1, SPRING)));
       }
       initialized.current = true;
     },
-    [tabs, width, labels, reduced, center, lensWidth, motion, stretch, fade],
-  );
-  useEffect(() => {
-    if (!dragging.current) animateTo(activeIndex);
-  }, [activeIndex, target.center, target.width, animateTo]);
-
-  const select = useCallback(
-    (index: number, fromGesture = false) => {
-      const tab = tabs[index];
-      if (!tab || (suppressClick.current && !fromGesture)) return;
-      setFocusId(tab.id);
-      animateTo(index);
-      if (tab.id !== activeId) {
-        if (Platform.OS !== 'web') void Haptics.selectionAsync().catch(() => {});
-        onChange(tab.id);
-      }
-    },
-    [tabs, activeId, onChange, animateTo],
+    [width, reduced, center, lensWidth, stretch, fade],
   );
 
+  // Place the initial lens before paint, and animate committed navigation exactly once.
+  useLayoutEffect(() => {
+    if (!dragging.current) animateTo(target);
+  });
+
+  const select = (index: number, fromGesture = false) => {
+    const tab = tabs[index];
+    if (!tab || (suppressClick.current && !fromGesture)) return;
+    setFocusId(tab.id);
+    if (tab.id === activeId) {
+      if (!fromGesture) animateTo(target);
+    } else {
+      if (Platform.OS !== 'web') void Haptics.selectionAsync().catch(() => {});
+      onChange(tab.id);
+    }
+  };
   const beginDrag = () => {
     dragging.current = true;
     dragStart.current = center.get();
     dragIndex.current = activeIndex;
     cancelAnimation(center);
+    cancelAnimation(lensWidth);
     cancelAnimation(stretch);
-    cancelAnimation(motion);
-    motion.set(reduced ? 0 : 1);
-    stretch.set(reduced ? 1 : withTiming(1.16, { duration: 90 }));
+    stretch.set(reduced ? 1 : withTiming(1.08, { duration: 80 }));
   };
   const moveDrag = (dx: number) => {
     const next = clamp(
@@ -437,14 +334,15 @@ export function LiquidGlassDock({
   const finishDrag = () => {
     dragging.current = false;
     const index = nearestDockTab(center.get(), width, tabs.length);
+    animateTo(dockGeometry(width, tabs.length, index, labels[tabs[index].id] ?? 32), true);
     select(index, true);
-    if (Platform.OS === 'web') (cells.current[tabs[index].id] as (View & { focus?: () => void }) | null)?.focus?.();
+    if (Platform.OS === 'web')
+      (cells.current[tabs[index].id] as (View & { focus?: () => void }) | null)?.focus?.();
   };
   const cancelDrag = () => {
     dragging.current = false;
-    animateTo(activeIndex);
+    animateTo(target, true);
   };
-  // DOM pointer capture handles mouse, pen, and touch without selecting label text.
   const pointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || event.button !== 0) return;
     suppressClick.current = false;
@@ -472,8 +370,7 @@ export function LiquidGlassDock({
       finishDrag();
     }
   };
-
-  // PanResponder stores these callbacks; ref reads happen on gestures, never during render.
+  // PanResponder registers callbacks; refs are only read by touch events.
   // eslint-disable-next-line react-hooks/refs
   const pan = PanResponder.create({
     onMoveShouldSetPanResponderCapture: (_, gesture) =>
@@ -484,44 +381,6 @@ export function LiquidGlassDock({
     onPanResponderTerminate: cancelDrag,
     onPanResponderTerminationRequest: () => true,
   });
-
-  const lensStyle = useAnimatedStyle(() => ({
-    left: center.value - lensWidth.value / 2,
-    width: lensWidth.value,
-    opacity: fade.value,
-    transform: [
-      { scaleX: stretch.value },
-      { scaleY: interpolate(stretch.value, [1, 1.22], [1, 0.92]) },
-    ],
-  }));
-  const counterTranslate = useAnimatedStyle(() => ({
-    transform: [{ translateX: -(center.value - lensWidth.value / 2) }],
-  }));
-  const smear = useAnimatedStyle(() => ({ opacity: reduced ? 0 : motion.value }));
-  const blueRow = (capture = false) => (
-    <View
-      ref={capture ? sourceRef : undefined}
-      collapsable={false}
-      style={[styles.row, { width, height: LENS_HEIGHT }]}
-    >
-      {tabs.map((tab, index) => (
-        <DockCell
-          key={tab.id}
-          tab={tab}
-          index={index}
-          cell={cell}
-          center={center}
-          blue
-          reduced={reduced}
-          active={false}
-          focused={false}
-          onPress={() => {}}
-          onFocus={() => {}}
-        />
-      ))}
-    </View>
-  );
-  const measure = (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width);
   const keyDown = (event: React.KeyboardEvent) => {
     const focused = Math.max(
       0,
@@ -542,92 +401,88 @@ export function LiquidGlassDock({
     setFocusId(tabs[next].id);
     (cells.current[tabs[next].id] as (View & { focus?: () => void }) | null)?.focus?.();
   };
-
+  const lensStyle = useAnimatedStyle(() => ({
+    left: CONTENT_INSET + center.value - lensWidth.value / 2,
+    width: lensWidth.value,
+    opacity: fade.value,
+    transform: [
+      { scaleX: stretch.value },
+      { scaleY: interpolate(stretch.value, [1, 1.12], [1, 0.95]) },
+    ],
+  }));
+  const measure = (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width);
+  const canBlur =
+    Platform.OS === 'ios' ||
+    (Platform.OS === 'android' && !!blurTarget && Number(Platform.Version) >= 31);
   if (!tabs.length) return null;
   const content = (
     <View
-      onLayout={measure}
+      style={[
+        styles.surface,
+        !canBlur &&
+          Platform.OS !== 'web' && {
+            backgroundColor: colors.dark ? 'rgba(24,42,52,0.94)' : 'rgba(250,252,255,0.94)',
+          },
+      ]}
       {...(Platform.OS === 'web' ? {} : pan.panHandlers)}
-      style={styles.surface}
     >
-      {Platform.OS !== 'web' && (
+      {canBlur && (
         <BlurView
           pointerEvents="none"
-          tint="light"
+          tint={colors.dark ? 'dark' : 'light'}
           intensity={BLUR}
           blurTarget={blurTarget}
           blurMethod={blurTarget ? 'dimezisBlurViewSdk31Plus' : 'none'}
           style={StyleSheet.absoluteFill}
         />
       )}
+      <Gloss />
       <View pointerEvents="none" style={styles.topRim} />
-      <View style={styles.row}>
-        {tabs.map((tab, index) => (
-          <DockCell
-            key={tab.id}
-            tab={tab}
-            index={index}
-            cell={cell}
-            center={center}
-            reduced={reduced}
-            active={index === activeIndex}
-            focused={
-              tab.id === focusId || (!tabs.some((t) => t.id === focusId) && index === activeIndex)
-            }
-            buttonRef={(view) => {
-              cells.current[tab.id] = view;
-            }}
-            onPress={() => select(index)}
-            onFocus={() => setFocusId(tab.id)}
-            onMeasure={(measured) =>
-              setLabels((previous) =>
-                previous[tab.id] === measured ? previous : { ...previous, [tab.id]: measured },
-              )
-            }
-          />
-        ))}
-      </View>
       {!!width && (
         <Animated.View
           pointerEvents="none"
-          accessibilityElementsHidden
           aria-hidden
+          accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
-          style={[styles.lens, lensStyle]}
+          style={[
+            styles.lens,
+            { backgroundColor: colors.dark ? 'rgba(225,244,255,0.075)' : 'rgba(255,255,255,0.22)' },
+            lensStyle,
+          ]}
         >
-          <View style={styles.lensHighlight} />
-          <Animated.View style={[styles.counterRow, { width }, counterTranslate]}>
-            {blueRow(true)}
-          </Animated.View>
-          {Platform.OS === 'web' ? (
-            <Animated.View
-              style={[
-                styles.counterRow,
-                { width },
-                counterTranslate,
-                smear,
-                { filter: `url(#${filterId})` } as ViewStyle,
-              ]}
-            >
-              {blueRow()}
-            </Animated.View>
-          ) : (
-            !reduced && (
-              <NativeRefraction
-                key={tabs.map((tab) => `${tab.id}:${tab.label}`).join('|')}
-                sourceRef={sourceRef}
-                rowWidth={width}
-                center={center}
-                lensWidth={lensWidth}
-                motion={motion}
-              />
-            )
-          )}
+          <Gloss lens />
         </Animated.View>
       )}
+      <View onLayout={measure} style={styles.row}>
+        {!!width &&
+          tabs.map((tab, index) => (
+            <DockCell
+              key={tab.id}
+              tab={tab}
+              index={index}
+              cell={cell}
+              center={center}
+              reduced={reduced}
+              colors={colors}
+              active={index === activeIndex}
+              focused={
+                tab.id === focusId || (!tabs.some((t) => t.id === focusId) && index === activeIndex)
+              }
+              buttonRef={(view) => {
+                cells.current[tab.id] = view;
+              }}
+              onSelect={() => select(index)}
+              onFocus={() => setFocusId(tab.id)}
+              onMeasure={(measured) =>
+                setLabels((previous) =>
+                  previous[tab.id] === measured ? previous : { ...previous, [tab.id]: measured },
+                )
+              }
+            />
+          ))}
+      </View>
     </View>
   );
-
   const dockWidth = Math.min(viewport.width - 32, 520);
   return (
     <View
@@ -638,38 +493,48 @@ export function LiquidGlassDock({
         style,
       ]}
     >
-      <WebOptics id={filterId} />
       {Platform.OS === 'web' ? (
-        React.createElement(
-          'div',
-          {
-            role: 'tablist',
-            'aria-label': 'Main navigation',
-            className: 'liquid-glass-dock',
-            onKeyDown: keyDown,
-            onPointerDown: pointerDown,
-            onPointerMove: pointerMove,
-            onPointerUp: pointerUp,
-            onPointerCancel: () => {
+        <>
+          {React.createElement(
+            'style',
+            null,
+            `
+        .liquid-glass-dock {border-radius:9999px;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+        .liquid-glass-dock[data-appearance=dark] {background:rgba(22,40,50,.16);}
+        .liquid-glass-dock[data-appearance=light] {background:rgba(255,255,255,.16);}
+        .liquid-glass-dock [role=tab]:focus-visible {outline:2px solid ${colors.active};outline-offset:-5px;border-radius:9999px;}
+        @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {.liquid-glass-dock[data-appearance=light]{background:rgba(250,252,255,.94);}.liquid-glass-dock[data-appearance=dark]{background:rgba(24,42,52,.94);}}
+      `,
+          )}
+          <div
+            role="tablist"
+            aria-label="Main navigation"
+            className="liquid-glass-dock"
+            data-appearance={appearance}
+            onKeyDown={keyDown}
+            onPointerDown={pointerDown}
+            onPointerMove={pointerMove}
+            onPointerUp={pointerUp}
+            onPointerCancel={() => {
               webPointer.current = null;
               cancelDrag();
-            },
-            onLostPointerCapture: () => {
+            }}
+            onLostPointerCapture={() => {
               if (dragging.current) {
                 webPointer.current = null;
                 cancelDrag();
               }
-            },
-            onClickCapture: (event: React.MouseEvent) => {
+            }}
+            onClickCapture={(event) => {
               if (suppressClick.current) {
                 event.preventDefault();
                 event.stopPropagation();
               }
-            },
-            style: { borderRadius: 9999 },
-          },
-          content,
-        )
+            }}
+          >
+            {content}
+          </div>
+        </>
       ) : (
         <View accessibilityRole="tablist">{content}</View>
       )}
@@ -681,62 +546,52 @@ const styles = StyleSheet.create({
   floating: {
     position: 'absolute',
     zIndex: 100,
-    shadowColor: '#283345',
-    shadowOpacity: 0.13,
+    shadowColor: '#000000',
+    shadowOpacity: 0.17,
     shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 12,
+    shadowOffset: { width: 0, height: 7 },
   },
   surface: {
     height: HEIGHT,
+    padding: CONTENT_INSET - 1,
     borderRadius: 9999,
-    backgroundColor: Platform.OS === 'web' ? 'transparent' : 'rgba(255,255,255,0.9)',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(200,206,215,0.65)',
+    borderColor: 'rgba(232,246,255,0.24)',
+    borderTopColor: 'rgba(255,255,255,0.48)',
     overflow: 'hidden',
   },
   topRim: {
     position: 'absolute',
-    left: 17,
-    right: 17,
+    left: 22,
+    right: 22,
     top: 0,
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: 'rgba(255,255,255,0.5)',
   },
-  row: { flexDirection: 'row', height: HEIGHT - 2, alignItems: 'center' },
-  cell: {
-    height: LENS_HEIGHT,
+  row: { height: LENS_HEIGHT, flexDirection: 'row', alignSelf: 'stretch', zIndex: 2 },
+  cell: { height: LENS_HEIGHT, alignItems: 'center', justifyContent: 'center', minWidth: 0 },
+  cellContent: { width: '100%', height: 50 },
+  glyphLayer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
-    minWidth: 0,
+    gap: 4,
   },
-  cellContent: { alignItems: 'center', justifyContent: 'center', gap: 3 },
-  label: { fontSize: 11, lineHeight: 14, letterSpacing: -0.15 },
+  label: { fontSize: 11, lineHeight: 15, letterSpacing: -0.1, fontWeight: '500' },
   lens: {
     position: 'absolute',
-    top: 4,
+    top: CONTENT_INSET - 1,
     height: LENS_HEIGHT,
     borderRadius: 9999,
-    backgroundColor: 'rgba(255,255,255,0.48)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.98)',
-    borderBottomColor: 'rgba(185,195,213,0.65)',
+    borderColor: 'rgba(243,250,255,0.6)',
+    borderBottomColor: 'rgba(220,240,255,0.24)',
     overflow: 'hidden',
-    shadowColor: '#758394',
-    shadowOpacity: 0.24,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    zIndex: 1,
   },
-  lensHighlight: {
-    position: 'absolute',
-    top: 1,
-    left: 12,
-    right: 12,
-    height: 2,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-  },
-  counterRow: { position: 'absolute', left: 0, top: 0, height: LENS_HEIGHT },
 });

@@ -25,22 +25,23 @@ function Screen() {
 }
 ```
 
-Place the dock after screen content, inside a screen-sized positioned parent and `SafeAreaProvider`. Reserve at least `74 + bottomSafeArea + 28` points below scroll content. Icons are render functions so the blue layer can use a filled variant. IDs must be unique. Keep tab arrays stable with a module constant or `useMemo`.
+Place the dock after screen content, inside a screen-sized positioned parent and `SafeAreaProvider`. Reserve at least `76 + bottomSafeArea + 28` points below scroll content. Icons are render functions so the blue layer can use a filled variant. IDs must be unique. Keep tab arrays stable with a module constant or `useMemo`.
 
 ## Rendering and fallbacks
 
-- Web: 20px backdrop blur, 180% saturation, SVG displacement/blur/chromatic fringe during transitions. A solid 94% white surface replaces backdrop blur in unsupported browsers.
-- iOS: `expo-blur` for the surface. A native Skia shader refracts a snapshot of the actual icon/label row during transitions. The normal vector row stays available if snapshot capture fails.
-- Android: wrap the scene in `BlurTargetView` from `expo-blur` and pass its ref as the optional `blurTarget` prop. Android 12+ gets native blur; older Android and missing targets use a translucent white fallback. STRIDE and the demo already supply targets.
-- Refraction affects the tab content, not arbitrary native screen pixels. The native optical effect has been bundle-checked but still needs testing on a physical device.
+- Web: a 16% tint with 24px backdrop blur and 180% saturation lets page content show through. SVG reflections and a bright upper rim supply the gloss. Unsupported browsers use a readable solid fallback.
+- iOS: `expo-blur` supplies the glass surface. Android 12+ uses `BlurTargetView`; wrap the scene and pass its ref as `blurTarget`. STRIDE and the demo already supply targets. Older Android uses the fallback.
+- Set `appearance="dark"` over dark screens and `appearance="light"` over light ones. The appearance changes the tint, inactive ink, and active blue for contrast. STRIDE uses the dark treatment.
+- The background capsule moves and stretches independently of stationary tab icons and labels. Lens position crossfades the two glyph variants in each cell. This keeps labels readable during rapid page changes and avoids clipped, counter-translated text layers.
+- Destination geometry is compared before starting a spring, so repeated navigation renders do not restart the animation. Reduced-motion changes still cancel the spring and use a fade.
 
-The component uses the existing Reanimated, Skia, safe-area, and haptics dependencies plus Expo SDK-compatible `expo-blur`. It intentionally does not load Skia/CanvasKit on web.
+The component uses Reanimated, Expo Blur, SVG, safe-area, and haptics. Native appearance still needs checking on a physical device.
 
 ## Interaction
 
 Tap selects a tab. Horizontal dragging previews the lens and commits the nearest tab on release; cancellation restores the controlled selection. Haptics fire when crossing native tab boundaries. Arrow keys move keyboard focus, Home/End reach the ends, and Enter/Space select. Screen readers get a tablist, individual tab labels, and selected state. Decorative copies are hidden from accessibility.
 
-OS reduced-motion settings disable spring, stretch, refraction, and press scaling; selection uses a short fade. `SPRING`, `BLUE`, `INK`, `BLUR`, and the shader/filter definitions in the component are the customization points.
+OS reduced-motion settings disable spring, stretch, and press scaling; selection uses a short fade. `SPRING`, `DARK`, `LIGHT`, `BLUR`, and the reflection gradient in the component are the customization points.
 
 ## Validation
 

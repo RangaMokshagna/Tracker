@@ -57,6 +57,7 @@ function StrideDock({
   if (keyboardVisible) return null;
   return (
     <LiquidGlassDock
+      appearance="dark"
       blurTarget={blurTarget}
       tabs={tabs}
       activeId={state.routes[state.index].key}

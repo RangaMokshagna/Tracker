@@ -3,6 +3,7 @@ import {
   dockCoverage,
   dockGeometry,
   nearestDockTab,
+  sameDockTarget,
 } from '../src/components/navigation/LiquidGlassDock';
 
 jest.mock('react-native', () => ({
@@ -10,11 +11,19 @@ jest.mock('react-native', () => ({
   StyleSheet: { create: (styles: unknown) => styles },
 }));
 jest.mock('expo-blur', () => ({}));
+jest.mock('react-native-svg', () => ({}));
 jest.mock('expo-haptics', () => ({}));
 jest.mock('react-native-reanimated', () => ({}));
 jest.mock('react-native-safe-area-context', () => ({}));
 
 describe('liquid dock lens geometry', () => {
+  it('keeps a spring running across unrelated route renders and fractional layout noise', () => {
+    const previous = { center: 175, width: 64, reduced: false };
+    expect(sameDockTarget(previous, { center: 175.01, width: 64.01 }, false)).toBe(true);
+    expect(sameDockTarget(previous, { center: 245, width: 64 }, false)).toBe(false);
+    expect(sameDockTarget(previous, { center: 175, width: 72 }, false)).toBe(false);
+    expect(sameDockTarget(previous, previous, true)).toBe(false);
+  });
   it('crossfades by lens position without producing NaN before layout', () => {
     expect(dockCoverage(0, 0, 0)).toBe(0);
     expect(dockCoverage(35, 70, 0)).toBe(1);
