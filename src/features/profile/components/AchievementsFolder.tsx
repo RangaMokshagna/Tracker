@@ -1,6 +1,5 @@
-import React, { useId } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
+import React from 'react';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { ArrowUpRight, Flame, Footprints, Trophy, Zap } from 'lucide-react-native';
 import { Text } from '../../../components/ui';
 import { GlassSheen } from '../../../components/ui/LiquidBackdrop';
@@ -28,12 +27,7 @@ export function BadgeGlyph({
 }
 
 /** Layered cards and a translucent vector folder use the same palette as the live UI. */
-function FolderArtwork({ badges }: { badges: readonly BadgeItem[] }) {
-  const id = `folder-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
-  const previews = [
-    ...badges.filter((badge) => badge.unlockedAt),
-    ...badges.filter((badge) => !badge.unlockedAt),
-  ].slice(0, 3);
+function FolderArtwork() {
   return (
     <View
       style={styles.artwork}
@@ -41,56 +35,12 @@ function FolderArtwork({ badges }: { badges: readonly BadgeItem[] }) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <View style={styles.groundShadow} />
-      <View style={styles.folderBack} />
-      {previews.map((badge, index) => (
-        <View
-          key={badge.id}
-          style={[
-            styles.preview,
-            {
-              left: 15 + index * 25,
-              top: index === 1 ? 4 : 15,
-              transform: [{ rotate: `${(index - 1) * 13}deg` }],
-            },
-          ]}
-        >
-          <BadgeGlyph
-            category={badge.category}
-            size={23}
-            color={badge.unlockedAt ? palette.lime : palette.mist}
-          />
-          <View style={styles.previewLine} />
-        </View>
-      ))}
-      <Svg style={styles.folderFront} width="132" height="104" viewBox="0 0 132 104">
-        <Defs>
-          <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-            <Stop stopColor="#B9E8DA" stopOpacity="0.84" />
-            <Stop offset="0.48" stopColor="#72B6A5" stopOpacity="0.78" />
-            <Stop offset="1" stopColor="#304F50" stopOpacity="0.97" />
-          </LinearGradient>
-        </Defs>
-        <Path
-          d="M7 20 Q6 10 17 12 L116 29 Q126 31 125 42 L119 88 Q118 99 107 97 L25 83 Q15 81 14 71Z"
-          fill={`url(#${id})`}
-          stroke="#D9F2E8"
-          strokeOpacity="0.64"
-          strokeWidth="1.2"
-        />
-        <Path
-          d="M17 17 L115 34 Q120 35 120 42"
-          fill="none"
-          stroke="#E5F5E9"
-          strokeOpacity="0.6"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-        />
-      </Svg>
-      <View style={styles.folderSeal}>
-        <Trophy size={13} color={palette.limeLight} />
-        <Text style={styles.sealText}>stride</Text>
-      </View>
+      <Image
+        source={require('../../../../assets/achievements-folder-glass.png')}
+        resizeMode="contain"
+        style={styles.folderImage}
+        accessible={false}
+      />
     </View>
   );
 }
@@ -125,7 +75,7 @@ export function AchievementsFolder({
           <ArrowUpRight size={14} color={palette.lime} />
         </View>
       </View>
-      <FolderArtwork badges={badges} />
+      <FolderArtwork />
     </Pressable>
   );
 }
@@ -164,7 +114,8 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 11, lineHeight: 17, color: palette.mist, marginTop: 3 },
   open: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 13 },
   openText: { fontSize: 11, lineHeight: 16, color: palette.lime },
-  artwork: { width: 132, height: 126 },
+  artwork: { width: 154, height: 138, marginRight: -5 },
+  folderImage: { width: '100%', height: '100%' },
   groundShadow: {
     position: 'absolute',
     left: 22,
