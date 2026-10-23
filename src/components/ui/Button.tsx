@@ -4,28 +4,24 @@
  * Full-featured button with variants, sizes, loading, haptics, and spring animation.
  */
 
-import React from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
+import React from "react";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-} from 'react-native-reanimated';
-import { useTheme, spacing, borderRadius, animations } from '../../theme';
-import { useHaptics } from '../../hooks/useHaptics';
-import { Text } from './Text';
-import { GlassSheen } from './LiquidBackdrop';
+  useReducedMotion,
+} from "react-native-reanimated";
+import { useTheme, spacing, borderRadius, animations } from "../../theme";
+import { useHaptics } from "../../hooks/useHaptics";
+import { Text } from "./Text";
+import { GlassSheen } from "./LiquidBackdrop";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps {
   /** Button label */
@@ -58,11 +54,31 @@ export interface ButtonProps {
 
 const SIZE_CONFIG: Record<
   ButtonSize,
-  { height: number; paddingHorizontal: number; fontSize: number; iconGap: number }
+  {
+    height: number;
+    paddingHorizontal: number;
+    fontSize: number;
+    iconGap: number;
+  }
 > = {
-  sm: { height: 36, paddingHorizontal: spacing.sm, fontSize: 14, iconGap: spacing.xxs },
-  md: { height: 48, paddingHorizontal: spacing.xl, fontSize: 16, iconGap: spacing.xs },
-  lg: { height: 56, paddingHorizontal: spacing['2xl'], fontSize: 18, iconGap: spacing.sm },
+  sm: {
+    height: 36,
+    paddingHorizontal: spacing.sm,
+    fontSize: 14,
+    iconGap: spacing.xxs,
+  },
+  md: {
+    height: 48,
+    paddingHorizontal: spacing.xl,
+    fontSize: 16,
+    iconGap: spacing.xs,
+  },
+  lg: {
+    height: 56,
+    paddingHorizontal: spacing["2xl"],
+    fontSize: 18,
+    iconGap: spacing.sm,
+  },
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -73,8 +89,8 @@ export function Button({
   title,
   label,
   onPress,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   loading = false,
   disabled = false,
   iconLeft,
@@ -83,11 +99,12 @@ export function Button({
   style,
   accessibilityLabel,
 }: ButtonProps): React.JSX.Element {
-  const buttonTitle = title ?? label ?? '';
+  const buttonTitle = title ?? label ?? "";
   const buttonIconLeft = iconLeft ?? icon;
   const { colors } = useTheme();
   const haptics = useHaptics();
   const scale = useSharedValue(1);
+  const reduced = useReducedMotion();
 
   const sizeConfig = SIZE_CONFIG[size];
 
@@ -96,16 +113,16 @@ export function Button({
   }));
 
   const handlePressIn = () => {
-    scale.set(withSpring(0.97, animations.press));
+    scale.set(reduced ? 1 : withSpring(0.96, animations.press));
   };
 
   const handlePressOut = () => {
-    scale.set(withSpring(1, animations.press));
+    scale.set(reduced ? 1 : withSpring(1, animations.press));
   };
 
   const handlePress = () => {
     if (loading || disabled) return;
-    haptics.medium();
+    haptics.light();
     onPress?.();
   };
 
@@ -119,17 +136,15 @@ export function Button({
     const isDisabled = disabled || loading;
 
     switch (variant) {
-      case 'primary':
+      case "primary":
         return {
           container: {
-            backgroundColor: isDisabled
-              ? colors.primaryMuted
-              : colors.primary,
+            backgroundColor: isDisabled ? colors.primaryMuted : colors.primary,
           },
           textColor: isDisabled ? colors.textTertiary : colors.textOnPrimary,
           spinnerColor: colors.textOnPrimary,
         };
-      case 'secondary':
+      case "secondary":
         return {
           container: {
             backgroundColor: colors.glass,
@@ -139,23 +154,21 @@ export function Button({
           textColor: isDisabled ? colors.textTertiary : colors.primary,
           spinnerColor: colors.primary,
         };
-      case 'ghost':
+      case "ghost":
         return {
           container: {
-            backgroundColor: 'transparent',
+            backgroundColor: "transparent",
           },
           textColor: isDisabled ? colors.textTertiary : colors.primary,
           spinnerColor: colors.primary,
         };
-      case 'danger':
+      case "danger":
         return {
           container: {
-            backgroundColor: isDisabled
-              ? colors.errorMuted
-              : colors.error,
+            backgroundColor: isDisabled ? colors.errorMuted : colors.error,
           },
-          textColor: isDisabled ? colors.textTertiary : '#FFFFFF',
-          spinnerColor: '#FFFFFF',
+          textColor: isDisabled ? colors.textTertiary : "#FFFFFF",
+          spinnerColor: "#FFFFFF",
         };
     }
   };
@@ -177,9 +190,9 @@ export function Button({
           height: Math.max(sizeConfig.height, 44), // 44pt minimum touch target
           paddingHorizontal: sizeConfig.paddingHorizontal,
           borderRadius: borderRadius.full,
-          overflow: 'hidden',
+          overflow: "hidden",
           borderTopWidth: 1,
-          borderTopColor: 'rgba(255,255,255,0.4)',
+          borderTopColor: "rgba(255,255,255,0.4)",
         },
         variantStyles.container,
         animatedStyle,
@@ -188,10 +201,7 @@ export function Button({
     >
       <GlassSheen />
       {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={variantStyles.spinnerColor}
-        />
+        <ActivityIndicator size="small" color={variantStyles.spinnerColor} />
       ) : (
         <View style={styles.content}>
           {buttonIconLeft && (
@@ -200,19 +210,17 @@ export function Button({
             </View>
           )}
           <Text
-            variant={size === 'sm' ? 'label' : 'body'}
+            variant={size === "sm" ? "label" : "body"}
             color={variantStyles.textColor as any}
             style={{
-              fontWeight: '600',
+              fontWeight: "600",
               fontSize: sizeConfig.fontSize,
             }}
           >
             {buttonTitle}
           </Text>
           {iconRight && (
-            <View style={{ marginLeft: sizeConfig.iconGap }}>
-              {iconRight}
-            </View>
+            <View style={{ marginLeft: sizeConfig.iconGap }}>{iconRight}</View>
           )}
         </View>
       )}
@@ -224,14 +232,14 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     minWidth: 44,
   },
   content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

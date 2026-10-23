@@ -1,41 +1,62 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import Svg, { Defs, RadialGradient, Stop, Rect, Ellipse } from 'react-native-svg';
+import React, { useContext, useId } from "react";
+import { Image, StyleSheet, View } from "react-native";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
+import { BlurTargetView } from "expo-blur";
+import { NaturalBlurContext } from "./GlassSurface";
+import { useTheme } from "../../theme/tokens";
 
-/** A lightweight, cross-platform ambient surface. No native blur module required. */
+/** The photograph is blurred once behind the reusable glass surfaces. */
 export function LiquidBackdrop() {
+  const target = useContext(NaturalBlurContext);
+  const { isDark, colors } = useTheme();
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill} accessibilityElementsHidden>
-      <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 900">
-        <Defs>
-          <RadialGradient id="sea">
-            <Stop stopColor="#557F7A" stopOpacity="0.5" />
-            <Stop offset="1" stopColor="#101B21" stopOpacity="0" />
-          </RadialGradient>
-          <RadialGradient id="peach">
-            <Stop stopColor="#B5816C" stopOpacity="0.25" />
-            <Stop offset="1" stopColor="#101B21" stopOpacity="0" />
-          </RadialGradient>
-        </Defs>
-        <Rect width="400" height="900" fill="#101B21" />
-        <Ellipse cx="345" cy="140" rx="330" ry="360" fill="url(#sea)" />
-        <Ellipse cx="-50" cy="540" rx="300" ry="300" fill="url(#peach)" />
-      </Svg>
-    </View>
+    <BlurTargetView
+      ref={target}
+      pointerEvents="none"
+      accessibilityElementsHidden
+      style={[StyleSheet.absoluteFill, { backgroundColor: colors.background }]}
+    >
+      <Image
+        source={require("../../../assets/natural-forest.jpg")}
+        blurRadius={24}
+        resizeMode="cover"
+        style={[StyleSheet.absoluteFill, { opacity: isDark ? 0.17 : 0.28 }]}
+      />
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: isDark
+              ? "rgba(30,29,26,0.62)"
+              : "rgba(233,238,240,0.42)",
+          },
+        ]}
+      />
+    </BlurTargetView>
   );
 }
 
 export function GlassSheen() {
+  const id = `sheen-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill} accessibilityElementsHidden>
-      <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 240">
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      style={StyleSheet.absoluteFill}
+    >
+      <Svg
+        width="100%"
+        height="100%"
+        preserveAspectRatio="none"
+        viewBox="0 0 400 240"
+      >
         <Defs>
-          <RadialGradient id="sheen" cx="0" cy="0" r="1">
-            <Stop stopColor="#E5F5E9" stopOpacity="0.13" />
-            <Stop offset="1" stopColor="#E5F5E9" stopOpacity="0" />
-          </RadialGradient>
+          <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <Stop stopColor="#FFFFFF" stopOpacity="0.22" />
+            <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.02" />
+          </LinearGradient>
         </Defs>
-        <Rect width="400" height="240" fill="url(#sheen)" />
+        <Rect width="400" height="240" fill={`url(#${id})`} />
       </Svg>
     </View>
   );

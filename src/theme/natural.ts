@@ -1,0 +1,42 @@
+/** Single source for the Natural Glass visual and motion system. */
+export const natural = {
+  color: {
+    ink: "#272620",
+    secondary: "#6D6D69",
+    tertiary: "#B0B1B0",
+    mist: "#E9EEF0",
+    mistMid: "#DFE6EA",
+    mistDeep: "#D4DEE3",
+    sky: "#2B6C90",
+    skyMid: "#6F9BB3",
+    skyLight: "#85B1CA",
+    skyTint: "#ABC8D9",
+    sand: "#F4C880",
+    sandMid: "#F4D8A8",
+    sandTint: "#F4E7D0",
+    sage: "#5E8F62",
+    sagePressed: "#4C7A51",
+    sageTint: "#DCE8DC",
+    charcoal: "#1E1D1A",
+  },
+  font: {
+    ui: "Inter_400Regular",
+    medium: "Inter_500Medium",
+    semibold: "Inter_600SemiBold",
+    display: "InstrumentSerif_400Regular",
+  },
+  space: { page: 20, section: 24, unit: 8, touch: 44, dockGap: 12 },
+  glass: {
+    blur: 28,
+    saturation: 1.6,
+    radius: 28,
+    light: "rgba(255,255,255,0.45)",
+    dark: "rgba(255,255,255,0.10)",
+  },
+  motion: {
+    micro: 150,
+    component: 300,
+    screen: 500,
+    spring: { stiffness: 300, damping: 25, mass: 1 },
+  },
+} as const;

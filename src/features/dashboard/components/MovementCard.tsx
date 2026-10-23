@@ -1,27 +1,38 @@
-import React, { useId } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { ArrowUpRight, Footprints, Play } from 'lucide-react-native';
-import { GlassCard, Text } from '../../../components/ui';
-import { palette } from '../../../theme/tokens';
+import React, { useId } from "react";
+import { Image, Pressable, StyleSheet, View } from "react-native";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
+import { ArrowUpRight, Footprints, Play } from "lucide-react-native";
+import { GlassCard, Text } from "../../../components/ui";
+import { palette, useTheme } from "../../../theme/tokens";
+import { natural } from "../../../theme/natural";
 
 /** Keep artwork decorative and live metrics crisp above its contrast scrim. */
 function Horizon() {
-  const id = `horizon-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  const { colors } = useTheme();
+  const id = `horizon-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   return (
     <>
       <Image
-        source={require('../../../../assets/movement-mountains.png')}
+        source={require("../../../../assets/natural-trail.jpg")}
         resizeMode="cover"
-        style={[StyleSheet.absoluteFill, { left: '-16%' }]}
+        style={[StyleSheet.absoluteFill, { left: "-16%" }]}
         accessible={false}
       />
-      <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 360 204">
+      <Svg
+        width="100%"
+        height="100%"
+        preserveAspectRatio="none"
+        viewBox="0 0 360 204"
+      >
         <Defs>
           <LinearGradient id={id} x1="0" y1="0.6" x2="1" y2="0.3">
-            <Stop stopColor="#101B21" stopOpacity="0.68" />
-            <Stop offset="0.58" stopColor="#101B21" stopOpacity="0.2" />
-            <Stop offset="1" stopColor="#101B21" stopOpacity="0" />
+            <Stop stopColor={colors.background} stopOpacity="0.94" />
+            <Stop
+              offset="0.58"
+              stopColor={colors.background}
+              stopOpacity="0.55"
+            />
+            <Stop offset="1" stopColor={colors.background} stopOpacity="0.08" />
           </LinearGradient>
         </Defs>
         <Rect width="360" height="204" fill={`url(#${id})`} />
@@ -43,6 +54,7 @@ export function MovementCard({
   progress: number;
   onStart: () => void;
 }) {
+  const { styles, colors } = useStyles();
   const completion = Math.max(0, Math.min(1, progress));
   return (
     <GlassCard style={styles.card}>
@@ -86,7 +98,11 @@ export function MovementCard({
         <View
           accessibilityRole="progressbar"
           accessibilityLabel="Daily distance goal"
-          accessibilityValue={{ min: 0, max: 100, now: Math.round(completion * 100) }}
+          accessibilityValue={{
+            min: 0,
+            max: 100,
+            now: Math.round(completion * 100),
+          }}
           style={styles.track}
         >
           <View style={[styles.fill, { width: `${completion * 100}%` }]} />
@@ -98,7 +114,11 @@ export function MovementCard({
           style={({ pressed }) => [styles.start, pressed && styles.pressed]}
         >
           <View style={styles.play}>
-            <Play size={16} color={palette.dark900} fill={palette.dark900} />
+            <Play
+              size={16}
+              color={colors.textOnPrimary}
+              fill={colors.textOnPrimary}
+            />
           </View>
           <View style={styles.startCopy}>
             <Text style={styles.startTitle}>Let’s go for a run</Text>
@@ -111,92 +131,141 @@ export function MovementCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    padding: 7,
-    borderRadius: 34,
-    marginBottom: 18,
-    backgroundColor: 'rgba(171,198,191,0.12)',
-    borderColor: 'rgba(224,242,235,0.24)',
-    borderTopColor: 'rgba(243,250,245,0.45)',
-  },
-  scene: {
-    minHeight: 216,
-    borderRadius: 27,
-    overflow: 'hidden',
-    justifyContent: 'space-between',
-    padding: 17,
-    backgroundColor: '#344D56',
-  },
-  heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    backgroundColor: 'rgba(185,232,218,0.09)',
-    borderWidth: 1,
-    borderColor: 'rgba(229,245,233,0.15)',
-  },
-  badgeDivider: { width: 1, height: 16, backgroundColor: 'rgba(185,232,218,0.28)' },
-  eyebrow: { fontSize: 8, letterSpacing: 1.4, fontWeight: '600', color: palette.limeLight },
-  metric: { marginTop: 38, maxWidth: '82%' },
-  distance: {
-    fontSize: 66,
-    lineHeight: 76,
-    letterSpacing: -2.5,
-    fontWeight: '600',
-    color: palette.pearl,
-    fontVariant: ['tabular-nums'],
-  },
-  unit: { fontSize: 20, letterSpacing: -0.3, fontWeight: '400', color: palette.limeLight },
-  caption: { fontSize: 11, lineHeight: 17, color: '#C4D6D2', marginTop: 2 },
-  details: { paddingHorizontal: 10, paddingTop: 17, paddingBottom: 3 },
-  goalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  goalLabel: { fontSize: 11, lineHeight: 16, color: palette.mist },
-  goalValue: { fontSize: 21, lineHeight: 28, color: palette.pearl, fontWeight: '400' },
-  goalUnit: { fontSize: 12, color: palette.mist },
-  percentBadge: { alignItems: 'flex-end' },
-  percent: {
-    fontSize: 21,
-    lineHeight: 26,
-    color: palette.lime,
-    fontWeight: '400',
-    fontVariant: ['tabular-nums'],
-  },
-  percentLabel: { fontSize: 10, lineHeight: 14, color: palette.mist },
-  track: {
-    height: 4,
-    backgroundColor: 'rgba(229,245,233,0.13)',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginTop: 12,
-    marginBottom: 17,
-  },
-  fill: { height: '100%', borderRadius: 4, backgroundColor: palette.lime },
-  start: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    minHeight: 70,
-    padding: 12,
-    borderRadius: 24,
-    backgroundColor: 'rgba(12,23,29,0.84)',
-    borderWidth: 1,
-    borderColor: 'rgba(229,245,233,0.1)',
-  },
-  pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
-  play: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: palette.lime,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  startCopy: { flex: 1 },
-  startTitle: { fontSize: 15, lineHeight: 21, fontWeight: '500', color: palette.pearl },
-  startSubtitle: { fontSize: 10, lineHeight: 16, color: palette.mist, marginTop: 2 },
-});
+const useStyles = () => {
+  const { colors, isDark } = useTheme();
+  const styles = StyleSheet.create({
+    card: {
+      padding: 7,
+      borderRadius: 34,
+      marginBottom: 24,
+      backgroundColor: colors.glass,
+      borderColor: "rgba(224,242,235,0.24)",
+      borderTopColor: "rgba(243,250,245,0.45)",
+    },
+    scene: {
+      minHeight: 216,
+      borderRadius: 27,
+      overflow: "hidden",
+      justifyContent: "space-between",
+      padding: 17,
+      backgroundColor: "#344D56",
+    },
+    heading: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+    },
+    badge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      borderRadius: 20,
+      backgroundColor: colors.primaryMuted,
+      borderWidth: 1,
+      borderColor: "rgba(229,245,233,0.15)",
+    },
+    badgeDivider: {
+      width: 1,
+      height: 16,
+      backgroundColor: colors.primaryMuted,
+    },
+    eyebrow: {
+      fontSize: 11,
+      letterSpacing: 0.6,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    metric: { marginTop: 38, maxWidth: "82%" },
+    distance: {
+      fontSize: 66,
+      lineHeight: 76,
+      letterSpacing: -2.5,
+      fontFamily: natural.font.display,
+      fontWeight: "400",
+      color: colors.text,
+      fontVariant: ["tabular-nums"],
+    },
+    unit: {
+      fontSize: 17,
+      letterSpacing: -0.3,
+      fontWeight: "400",
+      color: colors.textSecondary,
+    },
+    caption: {
+      fontSize: 11,
+      lineHeight: 17,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    details: { paddingHorizontal: 10, paddingTop: 17, paddingBottom: 3 },
+    goalRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    goalLabel: { fontSize: 11, lineHeight: 16, color: colors.textSecondary },
+    goalValue: {
+      fontSize: 21,
+      lineHeight: 28,
+      color: colors.text,
+      fontWeight: "400",
+    },
+    goalUnit: { fontSize: 12, color: colors.textSecondary },
+    percentBadge: { alignItems: "flex-end" },
+    percent: {
+      fontSize: 21,
+      lineHeight: 26,
+      color: colors.primary,
+      fontWeight: "400",
+      fontVariant: ["tabular-nums"],
+    },
+    percentLabel: { fontSize: 11, lineHeight: 14, color: colors.textSecondary },
+    track: {
+      height: 4,
+      backgroundColor: "rgba(229,245,233,0.13)",
+      borderRadius: 4,
+      overflow: "hidden",
+      marginTop: 12,
+      marginBottom: 17,
+    },
+    fill: { height: "100%", borderRadius: 4, backgroundColor: colors.primary },
+    start: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      minHeight: 70,
+      padding: 12,
+      borderRadius: 24,
+      backgroundColor: colors.primary,
+      borderWidth: 1,
+      borderColor: "rgba(229,245,233,0.1)",
+    },
+    pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
+    play: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    startCopy: { flex: 1 },
+    startTitle: {
+      fontSize: 15,
+      lineHeight: 21,
+      fontWeight: "500",
+      color: colors.textOnPrimary,
+    },
+    startSubtitle: {
+      fontSize: 11,
+      lineHeight: 16,
+      color: colors.textOnPrimary,
+      marginTop: 2,
+    },
+  });
+  return { styles, colors, isDark };
+};

@@ -2,14 +2,14 @@
  * STRIDE — Aggregate History Stats Glass Card
  */
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { GlassCard, Text } from '../../../components/ui';
-import { palette } from '../../../theme/tokens';
-import { formatDistance } from '../../../utils/distance';
-import { formatPace } from '../../../utils/pace';
-import { formatDuration } from '../../../utils/format';
-import type { UnitPreference } from '../../../types/user';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { GlassCard, Text } from "../../../components/ui";
+import { useTheme } from "../../../theme/tokens";
+import { formatDistance } from "../../../utils/distance";
+import { formatPace } from "../../../utils/pace";
+import { formatDuration } from "../../../utils/format";
+import type { UnitPreference } from "../../../types/user";
 
 interface AggregateStatsCardProps {
   totalDistanceMeters: number;
@@ -28,6 +28,7 @@ export const AggregateStatsCard: React.FC<AggregateStatsCardProps> = ({
   totalCalories,
   unit,
 }) => {
+  const { styles } = useStyles();
   const formattedDistance = formatDistance(totalDistanceMeters, unit);
   const formattedDuration = formatDuration(totalDurationSeconds);
   const formattedAvgPace = formatPace(avgPaceSecondsPerKm, unit);
@@ -45,7 +46,7 @@ export const AggregateStatsCard: React.FC<AggregateStatsCardProps> = ({
         </View>
         <View style={styles.runsPill}>
           <Text variant="caption" color="lime" style={styles.runsCount}>
-            {totalRuns} {totalRuns === 1 ? 'RUN' : 'RUNS'}
+            {totalRuns} {totalRuns === 1 ? "RUN" : "RUNS"}
           </Text>
         </View>
       </View>
@@ -84,53 +85,57 @@ export const AggregateStatsCard: React.FC<AggregateStatsCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    marginHorizontal: 16,
-    marginVertical: 8,
-    padding: 18,
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  periodLabel: {
-    letterSpacing: 1.5,
-    fontSize: 10,
-    fontWeight: '500',
-  },
-  distanceVal: {
-    fontSize: 34,
-    fontWeight: '300',
-    marginTop: 2,
-  },
-  runsPill: {
-    backgroundColor: 'rgba(185, 232, 218, 0.12)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(185, 232, 218, 0.3)',
-  },
-  runsCount: {
-    fontWeight: '500',
-    letterSpacing: 1,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    marginVertical: 14,
-  },
-  bottomGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  gridCell: {
-    alignItems: 'flex-start',
-  },
-  cellVal: {
-    fontWeight: '500',
-    marginTop: 4,
-  },
-});
+const useStyles = () => {
+  const { colors, isDark } = useTheme();
+  const styles = StyleSheet.create({
+    card: {
+      marginHorizontal: 20,
+      marginVertical: 8,
+      padding: 18,
+    },
+    topRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    periodLabel: {
+      letterSpacing: 1.5,
+      fontSize: 11,
+      fontWeight: "500",
+    },
+    distanceVal: {
+      fontSize: 34,
+      fontWeight: "300",
+      marginTop: 2,
+    },
+    runsPill: {
+      backgroundColor: colors.primaryMuted,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.primaryBorder,
+    },
+    runsCount: {
+      fontWeight: "500",
+      letterSpacing: 1,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.glassSubtle,
+      marginVertical: 14,
+    },
+    bottomGrid: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    gridCell: {
+      alignItems: "flex-start",
+    },
+    cellVal: {
+      fontWeight: "500",
+      marginTop: 4,
+    },
+  });
+  return { styles, colors, isDark };
+};

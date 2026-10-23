@@ -5,19 +5,19 @@
  * and slides in from top when offline.
  */
 
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import React, { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
   withSpring,
+  useReducedMotion,
   interpolate,
   Extrapolation,
-} from 'react-native-reanimated';
-import NetInfo from '@react-native-community/netinfo';
-import { useTheme, spacing, borderRadius, animations } from '../../theme';
-import { Text } from './Text';
+} from "react-native-reanimated";
+import NetInfo from "@react-native-community/netinfo";
+import { useTheme, spacing, borderRadius } from "../../theme";
+import { Text } from "./Text";
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -25,10 +25,13 @@ export function OfflineBanner(): React.JSX.Element | null {
   const { colors } = useTheme();
   const [isOffline, setIsOffline] = useState(false);
   const slideY = useSharedValue(-80);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      const offline = !(state.isConnected && state.isInternetReachable !== false);
+      const offline = !(
+        state.isConnected && state.isInternetReachable !== false
+      );
       setIsOffline(offline);
     });
 
@@ -36,23 +39,25 @@ export function OfflineBanner(): React.JSX.Element | null {
   }, []);
 
   useEffect(() => {
-    slideY.value = withSpring(isOffline ? 0 : -80, {
-      damping: 20,
-      stiffness: 150,
-      mass: 0.6,
-    });
-  }, [isOffline]);
+    slideY.set(
+      reduced
+        ? isOffline
+          ? 0
+          : -80
+        : withSpring(isOffline ? 0 : -80, {
+            damping: 20,
+            stiffness: 150,
+            mass: 0.6,
+          }),
+    );
+  }, [isOffline, reduced, slideY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: slideY.value }],
-    opacity: interpolate(
-      slideY.value,
-      [-80, 0],
-      [0, 1],
-      Extrapolation.CLAMP,
-    ),
+    opacity: interpolate(slideY.value, [-80, 0], [0, 1], Extrapolation.CLAMP),
   }));
 
+  if (!isOffline) return null;
   return (
     <Animated.View
       style={[
@@ -71,7 +76,7 @@ export function OfflineBanner(): React.JSX.Element | null {
         ⚡
       </Text>
       <Text variant="bodySmall" color="warning" style={styles.text}>
-        You're offline — data will sync when connected
+        You&apos;re offline — data will sync when connected
       </Text>
     </Animated.View>
   );
@@ -81,12 +86,10 @@ export function OfflineBanner(): React.JSX.Element | null {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    top: 0,
-    left: spacing.md,
-    right: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
@@ -99,6 +102,6 @@ const styles = StyleSheet.create({
   },
   text: {
     flex: 1,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

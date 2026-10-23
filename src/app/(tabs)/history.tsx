@@ -1,31 +1,34 @@
-import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
+import { LiquidBackdrop } from "../../components/ui/LiquidBackdrop";
 /**
  * STRIDE — Run History Screen
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   StatusBar,
   StyleSheet,
   View,
   RefreshControl,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Text, EmptyState, OfflineBanner } from '../../components/ui';
-import { palette } from '../../theme/tokens';
-import { useAuthStore } from '../../store/auth';
-import { useHaptics } from '../../hooks/useHaptics';
-import { getAllRuns, type LocalRun } from '../../services/sqlite';
-import { PeriodTabs, type HistoryPeriod } from '../../features/history/components/PeriodTabs';
-import { AggregateStatsCard } from '../../features/history/components/AggregateStatsCard';
-import { RecentRunCard } from '../../features/dashboard/components/RecentRunCard';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { Text, EmptyState, OfflineBanner } from "../../components/ui";
+import { palette, useTheme } from "../../theme/tokens";
+import { useAuthStore } from "../../store/auth";
+import { useHaptics } from "../../hooks/useHaptics";
+import { getAllRuns, type LocalRun } from "../../services/sqlite";
+import {
+  PeriodTabs,
+  type HistoryPeriod,
+} from "../../features/history/components/PeriodTabs";
+import { AggregateStatsCard } from "../../features/history/components/AggregateStatsCard";
+import { RecentRunCard } from "../../features/dashboard/components/RecentRunCard";
 
 const MOCK_RUNS: LocalRun[] = [
   {
-    id: 'run_hist_1',
-    userId: 'guest',
+    id: "run_hist_1",
+    userId: "guest",
     startedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
     finishedAt: new Date(Date.now() - 86400000 * 1 + 1940000).toISOString(),
     distanceMeters: 6200,
@@ -40,19 +43,19 @@ const MOCK_RUNS: LocalRun[] = [
     avgHeartRate: 155,
     maxHeartRate: 172,
     avgCadence: 168,
-    routePolyline: '',
-    runType: 'free',
-    source: 'gps',
-    title: 'Evening Cruise',
-    notes: 'Strong negative split finish. Aerobic zone maintained.',
+    routePolyline: "",
+    runType: "free",
+    source: "gps",
+    title: "Evening Cruise",
+    notes: "Strong negative split finish. Aerobic zone maintained.",
     rating: 5,
     perceivedEffort: 6,
     isRace: false,
     synced: true,
   },
   {
-    id: 'run_hist_2',
-    userId: 'guest',
+    id: "run_hist_2",
+    userId: "guest",
     startedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     finishedAt: new Date(Date.now() - 86400000 * 2 + 1610000).toISOString(),
     distanceMeters: 5100,
@@ -67,19 +70,19 @@ const MOCK_RUNS: LocalRun[] = [
     avgHeartRate: 150,
     maxHeartRate: 165,
     avgCadence: 165,
-    routePolyline: '',
-    runType: 'free',
-    source: 'gps',
-    title: 'Morning Easy',
-    notes: 'Steady cadence work.',
+    routePolyline: "",
+    runType: "free",
+    source: "gps",
+    title: "Morning Easy",
+    notes: "Steady cadence work.",
     rating: 4,
     perceivedEffort: 5,
     isRace: false,
     synced: true,
   },
   {
-    id: 'run_hist_3',
-    userId: 'guest',
+    id: "run_hist_3",
+    userId: "guest",
     startedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
     finishedAt: new Date(Date.now() - 86400000 * 4 + 2750000).toISOString(),
     distanceMeters: 8400,
@@ -94,19 +97,19 @@ const MOCK_RUNS: LocalRun[] = [
     avgHeartRate: 158,
     maxHeartRate: 175,
     avgCadence: 166,
-    routePolyline: '',
-    runType: 'free',
-    source: 'gps',
-    title: 'Weekend Long Run',
-    notes: 'Endurance foundation run with high efficiency.',
+    routePolyline: "",
+    runType: "free",
+    source: "gps",
+    title: "Weekend Long Run",
+    notes: "Endurance foundation run with high efficiency.",
     rating: 5,
     perceivedEffort: 7,
     isRace: false,
     synced: true,
   },
   {
-    id: 'run_hist_4',
-    userId: 'guest',
+    id: "run_hist_4",
+    userId: "guest",
     startedAt: new Date(Date.now() - 86400000 * 6).toISOString(),
     finishedAt: new Date(Date.now() - 86400000 * 6 + 1320000).toISOString(),
     distanceMeters: 4200,
@@ -121,11 +124,11 @@ const MOCK_RUNS: LocalRun[] = [
     avgHeartRate: 145,
     maxHeartRate: 160,
     avgCadence: 162,
-    routePolyline: '',
-    runType: 'free',
-    source: 'gps',
-    title: 'Shakeout Jog',
-    notes: 'Recovery run.',
+    routePolyline: "",
+    runType: "free",
+    source: "gps",
+    title: "Shakeout Jog",
+    notes: "Recovery run.",
     rating: 4,
     perceivedEffort: 4,
     isRace: false,
@@ -134,11 +137,12 @@ const MOCK_RUNS: LocalRun[] = [
 ];
 
 export default function HistoryScreen(): React.JSX.Element {
+  const { styles, isDark } = useStyles();
   const router = useRouter();
   const haptics = useHaptics();
   const { profile } = useAuthStore();
 
-  const [period, setPeriod] = useState<HistoryPeriod>('week');
+  const [period, setPeriod] = useState<HistoryPeriod>("week");
   const [runs, setRuns] = useState<LocalRun[]>(MOCK_RUNS);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -149,7 +153,7 @@ export default function HistoryScreen(): React.JSX.Element {
         setRuns(dbRuns);
       }
     } catch (e) {
-      console.log('[STRIDE] Local runs fetch note:', e);
+      console.log("[STRIDE] Local runs fetch note:", e);
     }
   };
 
@@ -168,25 +172,34 @@ export default function HistoryScreen(): React.JSX.Element {
   const filteredRuns = runs.filter((r) => {
     const runDate = new Date(r.startedAt).getTime();
     const now = Date.now();
-    if (period === 'week') {
+    if (period === "week") {
       return now - runDate <= 7 * 86400000;
     }
-    if (period === 'month') {
+    if (period === "month") {
       return now - runDate <= 30 * 86400000;
     }
     return true;
   });
 
-  const totalDistance = filteredRuns.reduce((acc, r) => acc + r.distanceMeters, 0);
-  const totalDuration = filteredRuns.reduce((acc, r) => acc + r.durationSeconds, 0);
-  const totalCalories = filteredRuns.reduce((acc, r) => acc + (r.caloriesBurned || 0), 0);
+  const totalDistance = filteredRuns.reduce(
+    (acc, r) => acc + r.distanceMeters,
+    0,
+  );
+  const totalDuration = filteredRuns.reduce(
+    (acc, r) => acc + r.durationSeconds,
+    0,
+  );
+  const totalCalories = filteredRuns.reduce(
+    (acc, r) => acc + (r.caloriesBurned || 0),
+    0,
+  );
   const avgPace =
     totalDistance > 0 ? Math.round((totalDuration / totalDistance) * 1000) : 0;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <LiquidBackdrop />
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <OfflineBanner />
 
       <FlatList
@@ -194,13 +207,21 @@ export default function HistoryScreen(): React.JSX.Element {
         data={filteredRuns}
         keyExtractor={(item) => item.id}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.lime} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={palette.lime}
+          />
         }
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <View>
             <View style={styles.header}>
-              <Text variant="caption" color="dark300" style={styles.headerSubtitle}>
+              <Text
+                variant="caption"
+                color="dark300"
+                style={styles.headerSubtitle}
+              >
                 TRAINING LOG
               </Text>
               <Text variant="h1" color="white" style={styles.headerTitle}>
@@ -220,7 +241,7 @@ export default function HistoryScreen(): React.JSX.Element {
             />
 
             <View style={styles.sectionTitleRow}>
-              <Text variant="h3" color="white" style={{ fontWeight: '500' }}>
+              <Text variant="h3" color="white" style={{ fontWeight: "500" }}>
                 All Sessions ({filteredRuns.length})
               </Text>
             </View>
@@ -230,12 +251,12 @@ export default function HistoryScreen(): React.JSX.Element {
           <RecentRunCard
             run={{
               id: item.id,
-              date: new Date(item.startedAt).toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
+              date: new Date(item.startedAt).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
               }),
               distanceMeters: item.distanceMeters,
               durationSeconds: item.durationSeconds,
@@ -251,7 +272,7 @@ export default function HistoryScreen(): React.JSX.Element {
             title="No Runs in This Period"
             description="Lace up your running shoes and track your first session with STRIDE."
             actionLabel="Start a Run"
-            onAction={() => router.push('/(tabs)/run')}
+            onAction={() => router.push("/(tabs)/run")}
           />
         }
       />
@@ -259,31 +280,35 @@ export default function HistoryScreen(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#101B21',
-  },
-  listContent: {
-    paddingBottom: 125,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 16,
-  },
-  headerSubtitle: {
-    letterSpacing: 2,
-    fontSize: 11,
-    fontWeight: '500',
-  },
-  headerTitle: {
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  sectionTitleRow: {
-    paddingHorizontal: 20,
-    marginTop: 18,
-    marginBottom: 8,
-  },
-});
+const useStyles = () => {
+  const { colors, isDark } = useTheme();
+  const styles = StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    listContent: {
+      paddingBottom: 125,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 24,
+      paddingBottom: 16,
+    },
+    headerSubtitle: {
+      letterSpacing: 2,
+      fontSize: 11,
+      fontWeight: "500",
+    },
+    headerTitle: {
+      fontWeight: "600",
+      marginTop: 2,
+    },
+    sectionTitleRow: {
+      paddingHorizontal: 20,
+      marginTop: 18,
+      marginBottom: 8,
+    },
+  });
+  return { styles, colors, isDark };
+};

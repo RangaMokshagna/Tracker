@@ -5,15 +5,21 @@
  * and Stack navigation routes.
  */
 
-import React, { useEffect, useState } from 'react';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as SplashScreen from 'expo-splash-screen';
-import { getDatabase } from '../services/sqlite';
-import { useAuthStore } from '../store/auth';
-import { useGoalsStore } from '../store/goals';
-import { syncPendingRuns } from '../services/sync';
+import React, { useEffect, useState } from "react";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
+import { Inter_400Regular } from "@expo-google-fonts/inter/400Regular";
+import { Inter_500Medium } from "@expo-google-fonts/inter/500Medium";
+import { Inter_600SemiBold } from "@expo-google-fonts/inter/600SemiBold";
+import { InstrumentSerif_400Regular } from "@expo-google-fonts/instrument-serif/400Regular";
+import { useTheme } from "../theme/tokens";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as SplashScreen from "expo-splash-screen";
+import { getDatabase } from "../services/sqlite";
+import { useAuthStore } from "../store/auth";
+import { useGoalsStore } from "../store/goals";
+import { syncPendingRuns } from "../services/sync";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -27,6 +33,13 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout(): React.JSX.Element {
+  const { colors } = useTheme();
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    InstrumentSerif_400Regular,
+  });
   const [appReady, setAppReady] = useState(false);
   const initializeAuth = useAuthStore((s) => s.initialize);
   const initializeGoals = useGoalsStore((s) => s.initialize);
@@ -41,27 +54,30 @@ export default function RootLayout(): React.JSX.Element {
         // Trigger background sync if online
         syncPendingRuns().catch(() => {});
       } catch (e) {
-        console.warn('[STRIDE] App prepare error:', e);
+        console.warn("[STRIDE] App prepare error:", e);
       } finally {
         setAppReady(true);
-        await SplashScreen.hideAsync().catch(() => {});
       }
     }
     prepare();
   }, []);
 
-  if (!appReady) {
+  useEffect(() => {
+    if (appReady && (fontsLoaded || fontError))
+      void SplashScreen.hideAsync().catch(() => {});
+  }, [appReady, fontsLoaded, fontError]);
+  if (!appReady || (!fontsLoaded && !fontError)) {
     return <></>;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="light" />
+      <StatusBar style={colors.statusBar} />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#101B21' },
-          animation: 'slide_from_right',
+          contentStyle: { backgroundColor: colors.background },
+          animation: "slide_from_right",
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -69,26 +85,26 @@ export default function RootLayout(): React.JSX.Element {
           name="achievements"
           options={{
             gestureEnabled: false,
-            presentation: 'transparentModal',
-            animation: 'none',
-            contentStyle: { backgroundColor: 'transparent' },
+            presentation: "transparentModal",
+            animation: "none",
+            contentStyle: { backgroundColor: "transparent" },
           }}
         />
         <Stack.Screen
           name="run-setup"
-          options={{ animation: 'fade_from_bottom', animationDuration: 350 }}
+          options={{ animation: "fade_from_bottom", animationDuration: 350 }}
         />
         <Stack.Screen
           name="run/[id]"
           options={{
-            presentation: 'card',
+            presentation: "card",
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="onboarding/index"
           options={{
-            presentation: 'fullScreenModal',
+            presentation: "fullScreenModal",
             headerShown: false,
           }}
         />

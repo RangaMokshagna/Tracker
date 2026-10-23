@@ -5,9 +5,10 @@
  * Provides Skeleton.Text, Skeleton.Circle, Skeleton.Card compound components.
  */
 
-import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
+import React, { useEffect, useId, useState } from "react";
+import { View } from "react-native";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
+import type { StyleProp, ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -15,8 +16,10 @@ import Animated, {
   withTiming,
   interpolate,
   Easing,
-} from 'react-native-reanimated';
-import { useTheme, borderRadius as radii, spacing } from '../../theme';
+  useReducedMotion,
+  cancelAnimation,
+} from "react-native-reanimated";
+import { useTheme, borderRadius as radii, spacing } from "../../theme";
 
 // ─── Base Skeleton ───────────────────────────────────────────────────────────
 
@@ -32,29 +35,42 @@ export interface SkeletonBaseProps {
 }
 
 function SkeletonBase({
-  width = '100%',
+  width = "100%",
   height = 16,
   borderRadius = radii.sm,
   style,
 }: SkeletonBaseProps): React.JSX.Element {
   const { colors } = useTheme();
   const shimmer = useSharedValue(0);
+  const reduced = useReducedMotion();
+  const [measuredWidth, setMeasuredWidth] = useState(200);
+  const id = `loading-${useId().replace(/:/g, "")}`;
 
   useEffect(() => {
+    if (reduced) {
+      shimmer.set(0.5);
+      return;
+    }
     shimmer.value = withRepeat(
       withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true,
+      false,
     );
-  }, []);
+    return () => cancelAnimation(shimmer);
+  }, [reduced, shimmer]);
 
   const animatedStyle = useAnimatedStyle(() => {
     const opacity = interpolate(shimmer.value, [0, 1], [0.4, 0.8]);
     return { opacity };
   });
+  const sweep = useAnimatedStyle(() => ({
+    transform: [{ translateX: -80 + shimmer.value * (measuredWidth + 160) }],
+    opacity: reduced ? 0 : 0.5,
+  }));
 
   return (
     <Animated.View
+      onLayout={(event) => setMeasuredWidth(event.nativeEvent.layout.width)}
       accessibilityLabel="Loading"
       accessibilityRole="progressbar"
       style={[
@@ -63,11 +79,32 @@ function SkeletonBase({
           height,
           borderRadius,
           backgroundColor: colors.skeletonBase,
+          overflow: "hidden",
         },
         animatedStyle,
         style,
       ]}
-    />
+    >
+      <Animated.View
+        pointerEvents="none"
+        style={[{ position: "absolute", top: 0, bottom: 0, width: 80 }, sweep]}
+      >
+        <Svg width="100%" height="100%">
+          <Defs>
+            <LinearGradient id={id}>
+              <Stop stopColor={colors.skeletonHighlight} stopOpacity="0" />
+              <Stop offset="0.5" stopColor={colors.skeletonHighlight} />
+              <Stop
+                offset="1"
+                stopColor={colors.skeletonHighlight}
+                stopOpacity="0"
+              />
+            </LinearGradient>
+          </Defs>
+          <Rect width="100%" height="100%" fill={`url(#${id})`} />
+        </Svg>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
@@ -90,16 +127,19 @@ function SkeletonText({
   lines = 3,
   lineHeight = 14,
   gap = spacing.xs,
-  lastLineWidth = '60%',
+  lastLineWidth = "60%",
   style,
 }: SkeletonTextProps): React.JSX.Element {
   return (
-    <View style={[{ gap }, style]} accessibilityLabel={`Loading ${lines} lines of text`}>
+    <View
+      style={[{ gap }, style]}
+      accessibilityLabel={`Loading ${lines} lines of text`}
+    >
       {Array.from({ length: lines }).map((_, i) => (
         <SkeletonBase
           key={i}
           height={lineHeight}
-          width={i === lines - 1 && lines > 1 ? lastLineWidth : '100%'}
+          width={i === lines - 1 && lines > 1 ? lastLineWidth : "100%"}
           borderRadius={radii.sm}
         />
       ))}

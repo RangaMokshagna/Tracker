@@ -5,20 +5,24 @@
  * Supports pressable variant with spring scale animation.
  */
 
-import React from 'react';
-import {
-  Pressable,
-  View,
-  Platform,
-} from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
+import React from "react";
+import { Pressable, View, Platform } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-} from 'react-native-reanimated';
-import { useTheme, borderRadius as radii, shadows, animations } from '../../theme';
-import { GlassSheen } from './LiquidBackdrop';
+  useReducedMotion,
+} from "react-native-reanimated";
+import {
+  useTheme,
+  borderRadius as radii,
+  shadows,
+  animations,
+} from "../../theme";
+import { GlassSheen } from "./LiquidBackdrop";
+import { GlassMaterial } from "./GlassSurface";
+import * as Haptics from "expo-haptics";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -30,7 +34,7 @@ export interface GlassCardProps {
   /** Press handler (only when pressable) */
   onPress?: () => void;
   /** Visual variant */
-  variant?: 'default' | 'elevated';
+  variant?: "default" | "elevated";
   /** Border radius token key */
   radius?: keyof typeof radii;
   /** Accessibility label */
@@ -46,35 +50,36 @@ export function GlassCard({
   style,
   pressable = false,
   onPress,
-  variant = 'default',
-  radius = 'xxl',
+  variant = "default",
+  radius = "xxl",
   accessibilityLabel,
 }: GlassCardProps): React.JSX.Element {
   const { colors } = useTheme();
   const scale = useSharedValue(1);
+  const reduced = useReducedMotion();
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
   const handlePressIn = () => {
-    scale.set(withSpring(0.98, animations.press));
+    scale.set(reduced ? 1 : withSpring(0.96, animations.press));
   };
 
   const handlePressOut = () => {
-    scale.set(withSpring(1, animations.press));
+    scale.set(reduced ? 1 : withSpring(1, animations.press));
   };
 
   const cardStyle: ViewStyle = {
-    backgroundColor: variant === 'elevated' ? colors.glass : colors.glassSubtle,
+    backgroundColor: variant === "elevated" ? colors.glass : colors.glassSubtle,
     borderRadius: radii[radius],
     borderWidth: 1,
-    borderColor: 'rgba(225, 244, 238, 0.16)',
-    borderTopColor: 'rgba(225, 244, 238, 0.32)',
-    overflow: 'hidden',
-    ...(Platform.OS === 'android' && variant === 'elevated'
+    borderColor: colors.glassBorder,
+    borderTopColor: "rgba(255,255,255,0.7)",
+    overflow: "hidden",
+    ...(Platform.OS === "android" && variant === "elevated"
       ? shadows.elevated
-      : variant === 'elevated'
+      : variant === "elevated"
         ? shadows.elevated
         : shadows.card),
   };
@@ -82,13 +87,17 @@ export function GlassCard({
   if (pressable) {
     return (
       <AnimatedPressable
-        onPress={onPress}
+        onPress={() => {
+          void Haptics.selectionAsync().catch(() => {});
+          onPress?.();
+        }}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         style={[cardStyle, animatedStyle, style]}
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
       >
+        <GlassMaterial />
         <GlassSheen />
         {children}
       </AnimatedPressable>
@@ -96,10 +105,8 @@ export function GlassCard({
   }
 
   return (
-    <View
-      style={[cardStyle, style]}
-      accessibilityLabel={accessibilityLabel}
-    >
+    <View style={[cardStyle, style]} accessibilityLabel={accessibilityLabel}>
+      <GlassMaterial />
       <GlassSheen />
       {children}
     </View>

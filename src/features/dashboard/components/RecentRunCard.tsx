@@ -2,15 +2,15 @@
  * STRIDE — Recent Run Glass Card
  */
 
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { GlassCard, Text } from '../../../components/ui';
-import { palette } from '../../../theme/tokens';
-import { formatDuration } from '../../../utils/format';
-import { formatDistance } from '../../../utils/distance';
-import { formatPace } from '../../../utils/pace';
-import type { UnitPreference } from '../../../types/user';
-import { ChevronRight, Zap } from 'lucide-react-native';
+import React from "react";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { GlassCard, Text } from "../../../components/ui";
+import { palette, useTheme } from "../../../theme/tokens";
+import { formatDuration } from "../../../utils/format";
+import { formatDistance } from "../../../utils/distance";
+import { formatPace } from "../../../utils/pace";
+import type { UnitPreference } from "../../../types/user";
+import { ChevronRight, Zap } from "lucide-react-native";
 
 export interface RecentRunItem {
   id: string;
@@ -28,14 +28,23 @@ interface RecentRunCardProps {
   inset?: number;
 }
 
-export const RecentRunCard: React.FC<RecentRunCardProps> = ({ run, unit, onPress, inset = 16 }) => {
+export const RecentRunCard: React.FC<RecentRunCardProps> = ({
+  run,
+  unit,
+  onPress,
+  inset = 16,
+}) => {
+  const { styles, colors } = useStyles();
   const formattedDistance = formatDistance(run.distanceMeters, unit);
   const formattedDuration = formatDuration(run.durationSeconds);
   const formattedPace = formatPace(run.avgPaceSecondsPerKm, unit);
 
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
-      <GlassCard variant="default" style={[styles.card, { marginHorizontal: inset }]}>
+      <GlassCard
+        variant="default"
+        style={[styles.card, { marginHorizontal: inset }]}
+      >
         <View style={styles.content}>
           <View style={styles.leftCol}>
             <View style={styles.dateRow}>
@@ -69,7 +78,7 @@ export const RecentRunCard: React.FC<RecentRunCardProps> = ({ run, unit, onPress
           </View>
 
           <View style={styles.arrowCol}>
-            <ChevronRight size={20} color="rgba(255, 255, 255, 0.4)" />
+            <ChevronRight size={20} color={colors.textSecondary} />
           </View>
         </View>
       </GlassCard>
@@ -77,43 +86,47 @@ export const RecentRunCard: React.FC<RecentRunCardProps> = ({ run, unit, onPress
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    marginHorizontal: 0,
-    marginVertical: 6,
-    padding: 16,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  leftCol: {
-    flex: 1.2,
-  },
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 4,
-  },
-  distanceText: {
-    fontWeight: '500',
-    fontSize: 22,
-  },
-  statsCol: {
-    flexDirection: 'row',
-    gap: 16,
-    alignItems: 'center',
-  },
-  statItem: {
-    alignItems: 'flex-start',
-  },
-  statVal: {
-    fontWeight: '700',
-    marginTop: 2,
-  },
-  arrowCol: {
-    paddingLeft: 8,
-  },
-});
+const useStyles = () => {
+  const { colors, isDark } = useTheme();
+  const styles = StyleSheet.create({
+    card: {
+      marginHorizontal: 0,
+      marginVertical: 6,
+      padding: 16,
+    },
+    content: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    leftCol: {
+      flex: 1.2,
+    },
+    dateRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      marginBottom: 4,
+    },
+    distanceText: {
+      fontWeight: "500",
+      fontSize: 22,
+    },
+    statsCol: {
+      flexDirection: "row",
+      gap: 16,
+      alignItems: "center",
+    },
+    statItem: {
+      alignItems: "flex-start",
+    },
+    statVal: {
+      fontWeight: "700",
+      marginTop: 2,
+    },
+    arrowCol: {
+      paddingLeft: 8,
+    },
+  });
+  return { styles, colors, isDark };
+};

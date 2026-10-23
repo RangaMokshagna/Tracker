@@ -4,21 +4,22 @@
  * Circular icon button with glass background, haptic feedback, and 44pt minimum touch.
  */
 
-import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
+import React from "react";
+import { Pressable, StyleSheet } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-} from 'react-native-reanimated';
-import { useTheme, borderRadius, animations } from '../../theme';
-import { useHaptics } from '../../hooks/useHaptics';
+  useReducedMotion,
+} from "react-native-reanimated";
+import { useTheme, borderRadius, animations } from "../../theme";
+import { useHaptics } from "../../hooks/useHaptics";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type IconButtonSize = 'sm' | 'md' | 'lg';
-export type IconButtonVariant = 'glass' | 'transparent' | 'primary';
+export type IconButtonSize = "sm" | "md" | "lg";
+export type IconButtonVariant = "glass" | "transparent" | "primary";
 
 export interface IconButtonProps {
   /** Icon element to render */
@@ -52,8 +53,8 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export function IconButton({
   icon,
   onPress,
-  size = 'md',
-  variant = 'glass',
+  size = "md",
+  variant = "glass",
   disabled = false,
   accessibilityLabel,
   style,
@@ -61,6 +62,7 @@ export function IconButton({
   const { colors } = useTheme();
   const haptics = useHaptics();
   const scale = useSharedValue(1);
+  const reduced = useReducedMotion();
 
   const dimension = Math.max(SIZE_MAP[size], 44); // 44pt minimum touch target
 
@@ -69,11 +71,11 @@ export function IconButton({
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.9, animations.press);
+    scale.set(reduced ? 1 : withSpring(0.96, animations.press));
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, animations.press);
+    scale.set(reduced ? 1 : withSpring(1, animations.press));
   };
 
   const handlePress = () => {
@@ -85,22 +87,22 @@ export function IconButton({
   const getBackgroundColor = (): string => {
     if (disabled) return colors.glassSubtle;
     switch (variant) {
-      case 'glass':
+      case "glass":
         return colors.glass;
-      case 'transparent':
-        return 'transparent';
-      case 'primary':
+      case "transparent":
+        return "transparent";
+      case "primary":
         return colors.primary;
     }
   };
 
   const getBorderColor = (): string => {
     switch (variant) {
-      case 'glass':
+      case "glass":
         return colors.glassBorder;
-      case 'transparent':
-        return 'transparent';
-      case 'primary':
+      case "transparent":
+        return "transparent";
+      case "primary":
         return colors.primary;
     }
   };
@@ -121,7 +123,7 @@ export function IconButton({
           height: dimension,
           borderRadius: borderRadius.full,
           backgroundColor: getBackgroundColor(),
-          borderWidth: variant === 'glass' ? 1 : 0,
+          borderWidth: variant === "glass" ? 1 : 0,
           borderColor: getBorderColor(),
           opacity: disabled ? 0.5 : 1,
         },
@@ -138,7 +140,7 @@ export function IconButton({
 
 const styles = StyleSheet.create({
   base: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

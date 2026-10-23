@@ -1,87 +1,85 @@
-/**
- * STRIDE — 3-2-1 Pre-Run Countdown Overlay
- */
-
-import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
   withSequence,
   withTiming,
-  withSpring,
-} from 'react-native-reanimated';
-import { Text } from '../../../components/ui';
-import { palette } from '../../../theme/tokens';
-import { useHaptics } from '../../../hooks/useHaptics';
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
+import { Text } from "../../../components/ui";
+import { GlassMaterial } from "../../../components/ui/GlassSurface";
+import { useTheme } from "../../../theme/tokens";
+import { natural } from "../../../theme/natural";
 
-interface CountdownOverlayProps {
-  count: number;
-}
-
-export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ count }) => {
-  const haptics = useHaptics();
-  const scale = useSharedValue(0.4);
+export function CountdownOverlay({ count }: { count: number }) {
+  const { colors } = useTheme();
+  const reduced = useReducedMotion();
+  const scale = useSharedValue(1);
   const opacity = useSharedValue(0);
-
   useEffect(() => {
-    haptics.heavy();
-    scale.value = 0.4;
-    opacity.value = 0;
-
-    scale.value = withSpring(1.2, { damping: 10, stiffness: 140 });
-    opacity.value = withTiming(1, { duration: 200 });
-  }, [count]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    void Haptics.selectionAsync().catch(() => {});
+    scale.set(reduced ? 1 : 0.86);
+    opacity.set(0);
+    if (!reduced) scale.set(withTiming(1.05, { duration: 850 }));
+    opacity.set(
+      withSequence(
+        withTiming(1, { duration: 180 }),
+        withTiming(0.45, { duration: 650 }),
+      ),
+    );
+  }, [count, reduced, opacity, scale]);
+  const motion = useAnimatedStyle(() => ({
     opacity: opacity.value,
+    transform: [{ scale: scale.value }],
   }));
-
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.numberCircle, animatedStyle]}>
-        <Text style={styles.countText}>{count > 0 ? count : 'GO!'}</Text>
+    <View
+      accessibilityRole="alert"
+      accessibilityLiveRegion="assertive"
+      accessibilityLabel={`Starting in ${count}`}
+      style={[
+        StyleSheet.absoluteFill,
+        {
+          zIndex: 999,
+          backgroundColor: colors.glass,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      ]}
+    >
+      <GlassMaterial />
+      <Text
+        style={{
+          color: colors.textSecondary,
+          fontSize: 11,
+          letterSpacing: 1.5,
+        }}
+      >
+        TAKE A BREATH. FIND YOUR RHYTHM.
+      </Text>
+      <Animated.View style={motion}>
+        <Text
+          style={{
+            fontFamily: natural.font.display,
+            fontSize: 152,
+            lineHeight: 185,
+            color: colors.primary,
+          }}
+        >
+          {count > 0 ? count : "Go"}
+        </Text>
       </Animated.View>
-      <Text variant="caption" color="dark300" style={styles.tipText}>
-        GET READY TO STRIDE
+      <Text
+        style={{
+          fontFamily: natural.font.display,
+          fontSize: 28,
+          color: colors.text,
+        }}
+      >
+        Your next good moment.
       </Text>
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: '#101B21',
-    zIndex: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  numberCircle: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 4,
-    borderColor: palette.lime,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(185, 232, 218, 0.08)',
-    shadowColor: palette.lime,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 30,
-    elevation: 12,
-  },
-  countText: {
-    fontSize: 72,
-    fontWeight: '900',
-    color: palette.lime,
-    letterSpacing: -1,
-  },
-  tipText: {
-    letterSpacing: 2,
-    marginTop: 32,
-    fontWeight: '700',
-  },
-});
+}
