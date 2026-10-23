@@ -1,6 +1,6 @@
 import React, { createRef, useEffect, useMemo, useState } from 'react';
 import { Tabs } from 'expo-router';
-import { Keyboard, type View } from 'react-native';
+import { Keyboard, View } from 'react-native';
 import { BlurTargetView } from 'expo-blur';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { LayoutDashboard, Play, History, Sparkles, User } from 'lucide-react-native';
@@ -23,9 +23,10 @@ const LABELS: Record<string, string> = {
 
 function StrideDock({
   state,
-  navigation,
+  emitter,
+  navigateToTab,
   blurTarget,
-}: BottomTabBarProps & { blurTarget?: React.RefObject<View | null> }) {
+}: BottomTabBarProps & { blurTarget?: React.RefObject<React.ComponentRef<typeof View> | null> }) {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -64,8 +65,8 @@ function StrideDock({
       onChange={(key) => {
         const route = state.routes.find((item) => item.key === key);
         if (!route) return;
-        const event = navigation.emit({ type: 'tabPress', target: key, canPreventDefault: true });
-        if (!event.defaultPrevented) navigation.navigate(route.name, route.params);
+        const event = emitter.emit({ type: 'tabPress', target: key, canPreventDefault: true });
+        if (!event.defaultPrevented) navigateToTab(key);
       }}
     />
   );
@@ -73,7 +74,10 @@ function StrideDock({
 
 export default function TabLayout() {
   const targets = useMemo(
-    () => Object.fromEntries(Object.keys(LABELS).map((name) => [name, createRef<View>()])),
+    () =>
+      Object.fromEntries(
+        Object.keys(LABELS).map((name) => [name, createRef<React.ComponentRef<typeof View>>()]),
+      ),
     [],
   );
   return (

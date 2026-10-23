@@ -149,7 +149,7 @@ const STORIES: Record<
 /** Standalone interaction demo: /dock-demo. The dock itself has no demo dependencies. */
 export default function DockDemo() {
   const [activeId, setActiveId] = useState('today');
-  const target = useRef<View>(null);
+  const target = useRef<React.ComponentRef<typeof View>>(null);
   const story = STORIES[activeId];
   return (
     <View style={styles.screen}>

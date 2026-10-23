@@ -39,7 +39,7 @@ export interface LiquidGlassDockProps {
   activeId: string;
   onChange: (id: string) => void;
   /** Android's BlurTargetView ref; omit to use the solid frosted fallback. */
-  blurTarget?: React.RefObject<View | null>;
+  blurTarget?: React.RefObject<React.ComponentRef<typeof View> | null>;
   appearance?: 'light' | 'dark';
   style?: StyleProp<ViewStyle>;
 }
@@ -166,7 +166,7 @@ function DockCell({
   onSelect: () => void;
   onFocus: () => void;
   onMeasure: (width: number) => void;
-  buttonRef: (view: View | null) => void;
+  buttonRef: (view: React.ComponentRef<typeof View> | null) => void;
 }) {
   const pressed = useSharedValue(1);
   const scaling = useAnimatedStyle(() => ({
@@ -255,7 +255,7 @@ export function LiquidGlassDock({
   const dragIndex = useRef(-1);
   const webPointer = useRef<{ id: number; x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
-  const cells = useRef<Record<string, View | null>>({});
+  const cells = useRef<Record<string, React.ComponentRef<typeof View> | null>>({});
   const activeIndex = Math.max(
     0,
     tabs.findIndex((tab) => tab.id === activeId),
@@ -335,7 +335,10 @@ export function LiquidGlassDock({
     animateTo(dockGeometry(width, tabs.length, index, labels[tabs[index].id] ?? 32), true);
     select(index, true);
     if (Platform.OS === 'web')
-      (cells.current[tabs[index].id] as (View & { focus?: () => void }) | null)?.focus?.();
+      (
+        cells.current[tabs[index].id] as
+          (React.ComponentRef<typeof View> & { focus?: () => void }) | null
+      )?.focus?.();
   };
   const cancelDrag = () => {
     dragging.current = false;
@@ -397,7 +400,10 @@ export function LiquidGlassDock({
     } else return;
     event.preventDefault();
     setFocusId(tabs[next].id);
-    (cells.current[tabs[next].id] as (View & { focus?: () => void }) | null)?.focus?.();
+    (
+      cells.current[tabs[next].id] as
+        (React.ComponentRef<typeof View> & { focus?: () => void }) | null
+    )?.focus?.();
   };
   const lensStyle = useAnimatedStyle(() => ({
     left: HORIZONTAL_INSET - 1 + center.value - lensWidth.value / 2,
