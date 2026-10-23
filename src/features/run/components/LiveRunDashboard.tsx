@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text } from '../../../components/ui';
+import { Text, GlassCard } from '../../../components/ui';
 import { palette } from '../../../theme/tokens';
 import { formatDuration } from '../../../utils/format';
 import { formatDistance } from '../../../utils/distance';
@@ -42,7 +42,7 @@ export const LiveRunDashboard: React.FC<LiveRunDashboardProps> = ({ stats, unit 
       {/* Grid of secondary metrics */}
       <View style={styles.grid}>
         {/* Distance */}
-        <View style={styles.gridItem}>
+        <GlassCard style={styles.gridItem}>
           <View style={styles.labelRow}>
             <Gauge size={14} color="rgba(255, 255, 255, 0.5)" />
             <Text variant="caption" color="dark300">
@@ -50,10 +50,10 @@ export const LiveRunDashboard: React.FC<LiveRunDashboardProps> = ({ stats, unit 
             </Text>
           </View>
           <Text style={styles.gridValue}>{formattedDistance}</Text>
-        </View>
+        </GlassCard>
 
         {/* Time */}
-        <View style={styles.gridItem}>
+        <GlassCard style={styles.gridItem}>
           <View style={styles.labelRow}>
             <Timer size={14} color="rgba(255, 255, 255, 0.5)" />
             <Text variant="caption" color="dark300">
@@ -61,10 +61,10 @@ export const LiveRunDashboard: React.FC<LiveRunDashboardProps> = ({ stats, unit 
             </Text>
           </View>
           <Text style={styles.gridValue}>{formattedDuration}</Text>
-        </View>
+        </GlassCard>
 
         {/* Calories */}
-        <View style={styles.gridItem}>
+        <GlassCard style={styles.gridItem}>
           <View style={styles.labelRow}>
             <Flame size={14} color="#FF9500" />
             <Text variant="caption" color="dark300">
@@ -72,10 +72,10 @@ export const LiveRunDashboard: React.FC<LiveRunDashboardProps> = ({ stats, unit 
             </Text>
           </View>
           <Text style={styles.gridValue}>{stats.caloriesBurned} kcal</Text>
-        </View>
+        </GlassCard>
 
         {/* Elevation */}
-        <View style={styles.gridItem}>
+        <GlassCard style={styles.gridItem}>
           <View style={styles.labelRow}>
             <Mountain size={14} color="#00E676" />
             <Text variant="caption" color="dark300">
@@ -83,7 +83,7 @@ export const LiveRunDashboard: React.FC<LiveRunDashboardProps> = ({ stats, unit 
             </Text>
           </View>
           <Text style={styles.gridValue}>+{Math.round(stats.elevationGainM)} m</Text>
-        </View>
+        </GlassCard>
       </View>
 
       {/* Average Pace Footer */}
@@ -111,12 +111,12 @@ const styles = StyleSheet.create({
   metricCaption: {
     letterSpacing: 2,
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '500',
     marginBottom: 4,
   },
   heroPaceText: {
-    fontSize: 68,
-    fontWeight: '900',
+    fontSize: 72,
+    fontWeight: '300',
     color: '#FFFFFF',
     letterSpacing: -2,
     lineHeight: 74,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: '45%',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
+    borderRadius: 24,
     padding: 14,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   gridValue: {
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: '500',
     color: '#FFFFFF',
     letterSpacing: -0.5,
   },
@@ -157,15 +157,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'rgba(191, 255, 0, 0.08)',
+    backgroundColor: 'rgba(185, 232, 218, 0.08)',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginTop: 14,
     borderWidth: 1,
-    borderColor: 'rgba(191, 255, 0, 0.2)',
+    borderColor: 'rgba(185, 232, 218, 0.2)',
   },
   avgPaceVal: {
-    fontWeight: '800',
+    fontWeight: '500',
   },
 });

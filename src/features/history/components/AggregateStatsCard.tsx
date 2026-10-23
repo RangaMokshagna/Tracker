@@ -98,23 +98,23 @@ const styles = StyleSheet.create({
   periodLabel: {
     letterSpacing: 1.5,
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '500',
   },
   distanceVal: {
     fontSize: 34,
-    fontWeight: '900',
+    fontWeight: '300',
     marginTop: 2,
   },
   runsPill: {
-    backgroundColor: 'rgba(191, 255, 0, 0.12)',
+    backgroundColor: 'rgba(185, 232, 218, 0.12)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(191, 255, 0, 0.3)',
+    borderColor: 'rgba(185, 232, 218, 0.3)',
   },
   runsCount: {
-    fontWeight: '800',
+    fontWeight: '500',
     letterSpacing: 1,
   },
   divider: {
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   cellVal: {
-    fontWeight: '800',
+    fontWeight: '500',
     marginTop: 4,
   },
 });

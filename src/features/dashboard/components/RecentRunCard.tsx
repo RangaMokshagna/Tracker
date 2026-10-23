@@ -25,16 +25,17 @@ interface RecentRunCardProps {
   run: RecentRunItem;
   unit: UnitPreference;
   onPress: () => void;
+  inset?: number;
 }
 
-export const RecentRunCard: React.FC<RecentRunCardProps> = ({ run, unit, onPress }) => {
+export const RecentRunCard: React.FC<RecentRunCardProps> = ({ run, unit, onPress, inset = 16 }) => {
   const formattedDistance = formatDistance(run.distanceMeters, unit);
   const formattedDuration = formatDuration(run.durationSeconds);
   const formattedPace = formatPace(run.avgPaceSecondsPerKm, unit);
 
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
-      <GlassCard variant="default" style={styles.card}>
+      <GlassCard variant="default" style={[styles.card, { marginHorizontal: inset }]}>
         <View style={styles.content}>
           <View style={styles.leftCol}>
             <View style={styles.dateRow}>
@@ -78,7 +79,7 @@ export const RecentRunCard: React.FC<RecentRunCardProps> = ({ run, unit, onPress
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     marginVertical: 6,
     padding: 16,
   },
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   distanceText: {
-    fontWeight: '800',
+    fontWeight: '500',
     fontSize: 22,
   },
   statsCol: {

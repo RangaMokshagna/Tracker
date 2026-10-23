@@ -1,3 +1,4 @@
+import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
 /**
  * STRIDE — Runner Profile & Settings Screen
  */
@@ -101,6 +102,7 @@ export default function ProfileScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <LiquidBackdrop />
       <StatusBar barStyle="light-content" />
       <OfflineBanner />
 
@@ -152,7 +154,7 @@ export default function ProfileScreen(): React.JSX.Element {
               </Text>
             </View>
             <TouchableOpacity style={styles.unitPill} onPress={handleToggleUnit}>
-              <Text variant="label" color="lime" style={{ fontWeight: '800' }}>
+              <Text variant="label" color="lime" style={{ fontWeight: '500' }}>
                 {profile.unitPreference.toUpperCase()}
               </Text>
             </TouchableOpacity>
@@ -233,7 +235,7 @@ export default function ProfileScreen(): React.JSX.Element {
         <GlassCard variant="default" style={styles.sectionCard}>
           <View style={styles.prHeader}>
             <Trophy size={18} color="#FFD700" />
-            <Text variant="label" color="white" style={{ fontWeight: '800' }}>
+            <Text variant="label" color="white" style={{ fontWeight: '500' }}>
               PERSONAL RECORDS
             </Text>
           </View>
@@ -387,23 +389,23 @@ export default function ProfileScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#101B21',
   },
   scroll: {
-    paddingBottom: 40,
+    paddingBottom: 116,
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 24,
+    paddingBottom: 18,
   },
   headerCaption: {
     letterSpacing: 2,
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '500',
   },
   headerTitle: {
-    fontWeight: '900',
+    fontWeight: '600',
     marginTop: 2,
   },
   profileCard: {
@@ -420,7 +422,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(191, 255, 0, 0.12)',
+    backgroundColor: 'rgba(185, 232, 218, 0.12)',
     borderWidth: 2,
     borderColor: palette.lime,
     alignItems: 'center',
@@ -430,12 +432,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nameText: {
-    fontWeight: '800',
+    fontWeight: '500',
   },
   memberSince: {
     letterSpacing: 1,
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '500',
     marginTop: 4,
   },
   sectionCard: {
@@ -444,7 +446,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   sectionLabel: {
-    fontWeight: '800',
+    fontWeight: '500',
     letterSpacing: 1,
     fontSize: 11,
     color: '#888888',
@@ -457,7 +459,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   unitPill: {
-    backgroundColor: 'rgba(191, 255, 0, 0.12)',
+    backgroundColor: 'rgba(185, 232, 218, 0.12)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 14,
@@ -516,7 +518,7 @@ const styles = StyleSheet.create({
   },
   prVal: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '500',
     color: '#FFFFFF',
     marginTop: 4,
   },

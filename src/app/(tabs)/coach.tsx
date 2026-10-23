@@ -1,3 +1,4 @@
+import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
 /**
  * STRIDE — AI Coach Tab
  */
@@ -109,6 +110,7 @@ export default function CoachScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <LiquidBackdrop />
       <StatusBar barStyle="light-content" />
       <OfflineBanner />
 
@@ -122,11 +124,11 @@ export default function CoachScreen(): React.JSX.Element {
             <View style={styles.badgeRow}>
               <View style={styles.onlineDot} />
               <Text variant="caption" color="lime" style={styles.badgeText}>
-                CLAUDE 3.5 AI ENGINE ACTIVE
+                YOUR PERSONAL RUNNING COMPANION
               </Text>
             </View>
             <Text variant="h1" color="white" style={styles.title}>
-              AI Coach
+              Your running coach
             </Text>
           </View>
           <View style={styles.coachAvatar}>
@@ -144,7 +146,7 @@ export default function CoachScreen(): React.JSX.Element {
             <GlassCard variant="elevated" style={styles.injuryCard}>
               <View style={styles.injuryHeader}>
                 <AlertTriangle size={18} color="#FF9500" />
-                <Text variant="label" style={{ color: '#FF9500', fontWeight: '800' }}>
+                <Text variant="label" style={{ color: '#FF9500', fontWeight: '500' }}>
                   INJURY-RISK ALERT ({(injuryAlert.riskLevel || 'MODERATE').toUpperCase()})
                 </Text>
               </View>
@@ -162,8 +164,8 @@ export default function CoachScreen(): React.JSX.Element {
             <View style={styles.planHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Calendar size={18} color={palette.lime} />
-                <Text variant="label" color="lime" style={{ fontWeight: '800' }}>
-                  SMART WEEKLY PLAN
+                <Text variant="label" color="lime" style={{ fontWeight: '500' }}>
+                  YOUR WEEK, IN BALANCE
                 </Text>
               </View>
               <Text variant="caption" color="dark300">
@@ -205,7 +207,7 @@ export default function CoachScreen(): React.JSX.Element {
                   {item.state === 'done' ? (
                     <CheckCircle2 size={16} color="rgba(255, 255, 255, 0.4)" />
                   ) : item.state === 'today' ? (
-                    <Text variant="caption" color="lime" style={{ fontWeight: '800' }}>
+                    <Text variant="caption" color="lime" style={{ fontWeight: '500' }}>
                       TODAY
                     </Text>
                   ) : (
@@ -308,11 +310,13 @@ export default function CoachScreen(): React.JSX.Element {
             value={input}
             onChangeText={setInput}
             placeholder="Ask your coach anything..."
-            placeholderTextColor="#666666"
+            placeholderTextColor="#A8B8BF"
             returnKeyType="send"
             onSubmitEditing={() => handleSend()}
           />
           <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Send message to coach"
             style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
             disabled={!input.trim() || loading}
             onPress={() => handleSend()}
@@ -328,15 +332,15 @@ export default function CoachScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#101B21',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 24,
+    paddingBottom: 20,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -350,21 +354,21 @@ const styles = StyleSheet.create({
     backgroundColor: palette.lime,
   },
   badgeText: {
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: 9,
+    fontWeight: '500',
     letterSpacing: 1,
   },
   title: {
-    fontWeight: '900',
+    fontWeight: '600',
     marginTop: 2,
   },
   coachAvatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(191, 255, 0, 0.12)',
+    backgroundColor: 'rgba(185, 232, 218, 0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(191, 255, 0, 0.3)',
+    borderColor: 'rgba(185, 232, 218, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -414,9 +418,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   todayPlanRow: {
-    backgroundColor: 'rgba(191, 255, 0, 0.12)',
+    backgroundColor: 'rgba(185, 232, 218, 0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(191, 255, 0, 0.3)',
+    borderColor: 'rgba(185, 232, 218, 0.3)',
   },
   quickPromptsSection: {
     marginTop: 10,
@@ -425,8 +429,8 @@ const styles = StyleSheet.create({
   quickPromptLabel: {
     paddingHorizontal: 20,
     letterSpacing: 1.5,
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: 9,
+    fontWeight: '500',
     marginBottom: 8,
   },
   pillsRow: {
@@ -509,11 +513,14 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   inputBar: {
+    marginBottom: 90,
+    marginHorizontal: 16,
+    borderRadius: 30,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#141414',
+    backgroundColor: '#19272F',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.08)',
     gap: 10,

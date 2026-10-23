@@ -1,3 +1,4 @@
+import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
 /**
  * STRIDE — Run Detail Screen
  */
@@ -110,6 +111,7 @@ export default function RunDetailScreen(): React.JSX.Element {
   if (!run) {
     return (
       <SafeAreaView style={styles.safeArea}>
+      <LiquidBackdrop />
         <View style={styles.center}>
           <Text variant="body" color="dark300">
             Loading session...
@@ -125,6 +127,7 @@ export default function RunDetailScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <LiquidBackdrop />
       <StatusBar barStyle="light-content" />
 
       {/* Top Bar */}
@@ -132,7 +135,7 @@ export default function RunDetailScreen(): React.JSX.Element {
         <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text variant="label" color="white" style={{ fontWeight: '800' }}>
+        <Text variant="label" color="white" style={{ fontWeight: '500' }}>
           SESSION SUMMARY
         </Text>
         <TouchableOpacity style={styles.iconBtn} onPress={handleShare}>
@@ -238,7 +241,7 @@ export default function RunDetailScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#101B21',
   },
   center: {
     flex: 1,
@@ -262,7 +265,7 @@ const styles = StyleSheet.create({
   },
   scroll: {
     paddingHorizontal: 16,
-    paddingBottom: 40,
+    paddingBottom: 116,
   },
   mapContainer: {
     marginTop: 8,
@@ -275,11 +278,11 @@ const styles = StyleSheet.create({
   heroDate: {
     letterSpacing: 2,
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '500',
   },
   heroDistance: {
     fontSize: 48,
-    fontWeight: '900',
+    fontWeight: '600',
     marginTop: 4,
   },
   statsCard: {
@@ -296,7 +299,7 @@ const styles = StyleSheet.create({
   },
   statVal: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '500',
     color: '#FFFFFF',
     marginTop: 4,
   },
@@ -304,7 +307,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 10,
     borderWidth: 1,
-    borderColor: 'rgba(191, 255, 0, 0.25)',
+    borderColor: 'rgba(185, 232, 218, 0.25)',
   },
   aiHeader: {
     flexDirection: 'row',
@@ -313,7 +316,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   aiTitle: {
-    fontWeight: '800',
+    fontWeight: '500',
     letterSpacing: 1,
     fontSize: 12,
   },
@@ -326,7 +329,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   splitsHeading: {
-    fontWeight: '800',
+    fontWeight: '500',
     letterSpacing: 1,
     fontSize: 12,
     marginBottom: 12,

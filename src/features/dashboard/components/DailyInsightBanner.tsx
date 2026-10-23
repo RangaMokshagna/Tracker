@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(191, 255, 0, 0.25)',
+    borderColor: 'rgba(185, 232, 218, 0.25)',
   },
   header: {
     flexDirection: 'row',
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(191, 255, 0, 0.12)',
+    backgroundColor: 'rgba(185, 232, 218, 0.12)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,

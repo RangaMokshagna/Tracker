@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { Text as RNText, StyleSheet } from 'react-native';
+import { Text as RNText } from 'react-native';
 import type { TextProps as RNTextProps, TextStyle } from 'react-native';
-import { useTheme, typography } from '../../theme';
+import { useTheme, typography, palette } from '../../theme';
 import type { TypographyKey, ThemeColors } from '../../theme';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ export function Text({
   const resolvedColor = color
     ? COLOR_KEYS.has(color)
       ? colors[color as TextColorKey]
-      : color
+      : color in palette ? palette[color as keyof typeof palette] : color
     : colors.text;
 
   const typo = typography[variant];

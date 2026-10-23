@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   Pressable,
-  StyleSheet,
   View,
   Platform,
 } from 'react-native';
@@ -19,6 +18,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useTheme, borderRadius as radii, shadows, animations } from '../../theme';
+import { GlassSheen } from './LiquidBackdrop';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -58,18 +58,19 @@ export function GlassCard({
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.97, animations.press);
+    scale.set(withSpring(0.98, animations.press));
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, animations.press);
+    scale.set(withSpring(1, animations.press));
   };
 
   const cardStyle: ViewStyle = {
     backgroundColor: variant === 'elevated' ? colors.glass : colors.glassSubtle,
     borderRadius: radii[radius],
     borderWidth: 1,
-    borderColor: colors.glassBorder,
+    borderColor: 'rgba(225, 244, 238, 0.16)',
+    borderTopColor: 'rgba(225, 244, 238, 0.32)',
     overflow: 'hidden',
     ...(Platform.OS === 'android' && variant === 'elevated'
       ? shadows.elevated
@@ -88,6 +89,7 @@ export function GlassCard({
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
       >
+        <GlassSheen />
         {children}
       </AnimatedPressable>
     );
@@ -98,9 +100,8 @@ export function GlassCard({
       style={[cardStyle, style]}
       accessibilityLabel={accessibilityLabel}
     >
+      <GlassSheen />
       {children}
     </View>
   );
 }
-
-const styles = StyleSheet.create({});

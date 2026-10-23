@@ -80,6 +80,6 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     fontWeight: '800',
-    color: '#0A0A0A',
+    color: '#101B21',
   },
 });

@@ -7,13 +7,16 @@
 
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GlassSheen } from '../../components/ui/LiquidBackdrop';
 import { palette } from '../../theme/tokens';
 import { useHaptics } from '../../hooks/useHaptics';
 import { LayoutDashboard, Play, History, Sparkles, User } from 'lucide-react-native';
 
 export default function TabLayout(): React.JSX.Element {
   const haptics = useHaptics();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -22,18 +25,34 @@ export default function TabLayout(): React.JSX.Element {
         tabBarShowLabel: true,
         tabBarActiveTintColor: palette.lime,
         tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.45)',
+        tabBarHideOnKeyboard: true,
+        tabBarBackground: () => <GlassSheen />,
         tabBarStyle: {
-          backgroundColor: '#0F0F0F',
-          borderTopColor: 'rgba(255, 255, 255, 0.08)',
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: Math.max(insets.bottom, 12),
+          backgroundColor: 'rgba(31, 47, 55, 0.97)',
+          borderColor: 'rgba(220, 240, 230, 0.2)',
+          borderTopColor: 'rgba(220, 240, 230, 0.4)',
+          borderWidth: 1,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 68,
-          paddingTop: 8,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+          borderRadius: 34,
+          height: 72,
+          paddingTop: 9,
+          paddingBottom: 9,
+          paddingHorizontal: 5,
+          shadowColor: '#000000',
+          shadowOpacity: 0.3,
+          shadowRadius: 20,
+          shadowOffset: { width: 0, height: 12 },
+          elevation: 12,
+          overflow: 'hidden',
         },
         tabBarLabelStyle: {
           fontSize: 10,
-          fontWeight: '700',
-          letterSpacing: 0.5,
+          fontWeight: '500',
+          letterSpacing: 0,
           marginTop: 2,
         },
       }}
@@ -46,7 +65,7 @@ export default function TabLayout(): React.JSX.Element {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: 'Today',
           tabBarIcon: ({ color, focused }) => (
             <LayoutDashboard size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
@@ -55,7 +74,7 @@ export default function TabLayout(): React.JSX.Element {
       <Tabs.Screen
         name="run"
         options={{
-          title: 'Track',
+          title: 'Run',
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.runTabIcon, focused && styles.runTabIconFocused]}>
               <Play
@@ -79,7 +98,7 @@ export default function TabLayout(): React.JSX.Element {
       <Tabs.Screen
         name="coach"
         options={{
-          title: 'AI Coach',
+          title: 'Coach',
           tabBarIcon: ({ color, focused }) => (
             <Sparkles size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
@@ -103,11 +122,11 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(191, 255, 0, 0.15)',
+    backgroundColor: 'rgba(185, 232, 218, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(191, 255, 0, 0.3)',
+    borderColor: 'rgba(185, 232, 218, 0.3)',
   },
   runTabIconFocused: {
     backgroundColor: palette.lime,

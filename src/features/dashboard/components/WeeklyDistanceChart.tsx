@@ -47,21 +47,21 @@ export const WeeklyDistanceChart: React.FC<WeeklyDistanceChartProps> = ({
             THIS WEEK
           </Text>
           <Text variant="h3" color="white" style={styles.title}>
-            {totalWeeklyKm} {unit} Total
+            {totalWeeklyKm} {unit}
           </Text>
         </View>
         <View style={styles.legend}>
           <View style={styles.legendDot} />
           <Text variant="caption" color="lime">
-            Active Days
+            Movement
           </Text>
         </View>
       </View>
 
       <View style={styles.chartContainer}>
         {days.map((item, index) => {
-          const heightPercent = Math.max(8, Math.round((item.distanceMeters / maxMeters) * 100));
-          const val = (item.distanceMeters / conversion).toFixed(1);
+          const heightPercent = Math.max(0, Math.round((item.distanceMeters / maxMeters) * 100));
+
 
           return (
             <View key={index} style={styles.column}>
@@ -95,9 +95,9 @@ export const WeeklyDistanceChart: React.FC<WeeklyDistanceChartProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     marginVertical: 8,
-    padding: 16,
+    padding: 20,
   },
   headerRow: {
     flexDirection: 'row',
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   title: {
-    fontWeight: '800',
+    fontWeight: '500',
     marginTop: 2,
   },
   legend: {
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   activeBar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    backgroundColor: 'rgba(185, 232, 218, 0.36)',
   },
   restBar: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -171,6 +171,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   todayLabel: {
-    fontWeight: '800',
+    fontWeight: '500',
   },
 });

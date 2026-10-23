@@ -1,7 +1,7 @@
 /**
  * STRIDE Design System — Design Tokens
  *
- * Dark Glassmorphism + Neon Lime (#BFFF00)
+ * Tidal Glass: ink, sea glass, pearl, and warm apricot
  * All spacing, color, typography, animation, and shadow tokens.
  */
 
@@ -10,12 +10,12 @@ import { useThemeStore } from '../store/theme';
 // ─── Color Palettes ──────────────────────────────────────────────────────────
 
 export const palette = {
-  // Neon Lime (Primary)
-  lime: '#BFFF00',
-  limeDark: '#99CC00',
-  limeLight: '#D4FF4D',
-  limeMuted: 'rgba(191, 255, 0, 0.15)',
-  limeBorder: 'rgba(191, 255, 0, 0.30)',
+  // Sea glass (legacy lime keys retained for component compatibility)
+  lime: '#B9E8DA',
+  limeDark: '#72B6A5',
+  limeLight: '#E5F5E9',
+  limeMuted: 'rgba(185, 232, 218, 0.15)',
+  limeBorder: 'rgba(185, 232, 218, 0.30)',
 
   // Neutrals
   black: '#000000',
@@ -23,13 +23,13 @@ export const palette = {
   trueWhite: '#FFFFFF',
 
   // Dark palette
-  dark900: '#0A0A0A',
-  dark800: '#141414',
-  dark700: '#1E1E1E',
-  dark600: '#2A2A2A',
-  dark500: '#3A3A3A',
-  dark400: '#4A4A4A',
-  dark300: '#666666',
+  dark900: '#101B21',
+  dark800: '#19272F',
+  dark700: '#22333C',
+  dark600: '#30434C',
+  dark500: '#49606A',
+  dark400: '#81959E',
+  dark300: '#9BAEB5',
 
   // Light palette
   light100: '#FFFFFF',
@@ -37,7 +37,7 @@ export const palette = {
   light300: '#F0F0F0',
   light400: '#E0E0E0',
   light500: '#C0C0C0',
-  light600: '#999999',
+  light600: '#A8B8BF',
 
   // Semantic
   errorRed: '#FF4D4D',
@@ -62,6 +62,9 @@ export const palette = {
   backdropDark: 'rgba(0, 0, 0, 0.60)',
   backdropLight: 'rgba(0, 0, 0, 0.30)',
 
+  apricot: '#EDB79B',
+  pearl: '#F3F2EC',
+  mist: '#A8B8BF',
   transparent: 'transparent',
 } as const;
 
@@ -134,10 +137,10 @@ export const darkColors: ThemeColors = {
   primaryLight: palette.limeLight,
   primaryMuted: palette.limeMuted,
   primaryBorder: palette.limeBorder,
-  text: '#F5F5F5',
-  textSecondary: '#999999',
-  textTertiary: '#666666',
-  textOnPrimary: '#0A0A0A',
+  text: '#F3F2EC',
+  textSecondary: '#A8B8BF',
+  textTertiary: '#9BAEB5',
+  textOnPrimary: '#101B21',
   error: palette.errorRed,
   errorMuted: palette.errorRedMuted,
   warning: palette.warningAmber,
@@ -152,7 +155,7 @@ export const darkColors: ThemeColors = {
   backdrop: palette.backdropDark,
   skeletonBase: palette.dark700,
   skeletonHighlight: palette.dark500,
-  tabBar: 'rgba(10, 10, 10, 0.92)',
+  tabBar: 'rgba(27, 42, 50, 0.96)',
   statusBar: 'light',
 };
 
@@ -167,9 +170,9 @@ export const lightColors: ThemeColors = {
   primaryMuted: palette.limeMuted,
   primaryBorder: palette.limeBorder,
   text: '#1A1A1A',
-  textSecondary: '#666666',
-  textTertiary: '#999999',
-  textOnPrimary: '#0A0A0A',
+  textSecondary: '#9BAEB5',
+  textTertiary: '#A8B8BF',
+  textOnPrimary: '#101B21',
   error: palette.errorRed,
   errorMuted: palette.errorRedMuted,
   warning: palette.warningAmber,
@@ -232,13 +235,13 @@ export interface TypographyVariant {
 export const typography = {
   display: {
     fontSize: 48,
-    fontWeight: '700' as const,
+    fontWeight: '500' as const,
     lineHeight: 56,
     letterSpacing: -1.5,
   },
   h1: {
     fontSize: 32,
-    fontWeight: '700' as const,
+    fontWeight: '500' as const,
     lineHeight: 40,
     letterSpacing: -0.5,
   },

@@ -1,3 +1,4 @@
+import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
 /**
  * STRIDE — Run History Screen
  */
@@ -184,10 +185,12 @@ export default function HistoryScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <LiquidBackdrop />
       <StatusBar barStyle="light-content" />
       <OfflineBanner />
 
       <FlatList
+        showsVerticalScrollIndicator={false}
         data={filteredRuns}
         keyExtractor={(item) => item.id}
         refreshControl={
@@ -201,7 +204,7 @@ export default function HistoryScreen(): React.JSX.Element {
                 TRAINING LOG
               </Text>
               <Text variant="h1" color="white" style={styles.headerTitle}>
-                Run History
+                Every stride counts.
               </Text>
             </View>
 
@@ -217,7 +220,7 @@ export default function HistoryScreen(): React.JSX.Element {
             />
 
             <View style={styles.sectionTitleRow}>
-              <Text variant="h3" color="white" style={{ fontWeight: '800' }}>
+              <Text variant="h3" color="white" style={{ fontWeight: '500' }}>
                 All Sessions ({filteredRuns.length})
               </Text>
             </View>
@@ -259,23 +262,23 @@ export default function HistoryScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#101B21',
   },
   listContent: {
-    paddingBottom: 30,
+    paddingBottom: 125,
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 4,
+    paddingTop: 24,
+    paddingBottom: 16,
   },
   headerSubtitle: {
     letterSpacing: 2,
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '500',
   },
   headerTitle: {
-    fontWeight: '900',
+    fontWeight: '600',
     marginTop: 2,
   },
   sectionTitleRow: {

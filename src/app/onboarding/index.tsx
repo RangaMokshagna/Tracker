@@ -1,3 +1,4 @@
+import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
 /**
  * STRIDE — 3-Step Interactive Onboarding Flow
  */
@@ -63,6 +64,7 @@ export default function OnboardingScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <LiquidBackdrop />
       <StatusBar barStyle="light-content" />
 
       {/* Progress Dots */}
@@ -103,7 +105,7 @@ export default function OnboardingScreen(): React.JSX.Element {
                       <Text
                         variant="h3"
                         color={isSelected ? 'lime' : 'white'}
-                        style={{ fontWeight: '800' }}
+                        style={{ fontWeight: '500' }}
                       >
                         {g.title}
                       </Text>
@@ -172,7 +174,7 @@ export default function OnboardingScreen(): React.JSX.Element {
                     <Text
                       variant="label"
                       color={unit === 'km' ? 'dark900' : 'white'}
-                      style={{ fontWeight: '800' }}
+                      style={{ fontWeight: '500' }}
                     >
                       Kilometers (km)
                     </Text>
@@ -184,7 +186,7 @@ export default function OnboardingScreen(): React.JSX.Element {
                     <Text
                       variant="label"
                       color={unit === 'mi' ? 'dark900' : 'white'}
-                      style={{ fontWeight: '800' }}
+                      style={{ fontWeight: '500' }}
                     >
                       Miles (mi)
                     </Text>
@@ -215,7 +217,7 @@ export default function OnboardingScreen(): React.JSX.Element {
                     <MapPin size={22} color={palette.lime} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text variant="label" color="white" style={{ fontWeight: '800' }}>
+                    <Text variant="label" color="white" style={{ fontWeight: '500' }}>
                       Location & Route Tracking
                     </Text>
                     <Text variant="caption" color="dark300">
@@ -231,7 +233,7 @@ export default function OnboardingScreen(): React.JSX.Element {
                     <Bell size={22} color={palette.lime} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text variant="label" color="white" style={{ fontWeight: '800' }}>
+                    <Text variant="label" color="white" style={{ fontWeight: '500' }}>
                       Coaching & Streak Reminders
                     </Text>
                     <Text variant="caption" color="dark300">
@@ -262,7 +264,7 @@ export default function OnboardingScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#101B21',
   },
   dotsRow: {
     flexDirection: 'row',
@@ -292,7 +294,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'rgba(191, 255, 0, 0.12)',
+    backgroundColor: 'rgba(185, 232, 218, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -300,11 +302,11 @@ const styles = StyleSheet.create({
   stepTag: {
     letterSpacing: 2,
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '500',
     marginBottom: 8,
   },
   stepTitle: {
-    fontWeight: '900',
+    fontWeight: '600',
     fontSize: 32,
     lineHeight: 38,
     marginBottom: 8,
@@ -328,7 +330,7 @@ const styles = StyleSheet.create({
   },
   goalCardSelected: {
     borderColor: palette.lime,
-    backgroundColor: 'rgba(191, 255, 0, 0.08)',
+    backgroundColor: 'rgba(185, 232, 218, 0.08)',
   },
   form: {
     gap: 16,
@@ -379,7 +381,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(191, 255, 0, 0.12)',
+    backgroundColor: 'rgba(185, 232, 218, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -66,8 +66,8 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
       <Svg width={size} height={size}>
         <Defs>
           <LinearGradient id="limeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor="#D4FF4D" />
-            <Stop offset="100%" stopColor="#BFFF00" />
+            <Stop offset="0%" stopColor="#E5F5E9" />
+            <Stop offset="100%" stopColor="#B9E8DA" />
           </LinearGradient>
         </Defs>
 

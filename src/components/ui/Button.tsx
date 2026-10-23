@@ -11,7 +11,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import type { StyleProp, ViewStyle, TextStyle } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -20,6 +20,7 @@ import Animated, {
 import { useTheme, spacing, borderRadius, animations } from '../../theme';
 import { useHaptics } from '../../hooks/useHaptics';
 import { Text } from './Text';
+import { GlassSheen } from './LiquidBackdrop';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -95,11 +96,11 @@ export function Button({
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95, animations.press);
+    scale.set(withSpring(0.97, animations.press));
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, animations.press);
+    scale.set(withSpring(1, animations.press));
   };
 
   const handlePress = () => {
@@ -175,13 +176,17 @@ export function Button({
         {
           height: Math.max(sizeConfig.height, 44), // 44pt minimum touch target
           paddingHorizontal: sizeConfig.paddingHorizontal,
-          borderRadius: borderRadius.lg,
+          borderRadius: borderRadius.full,
+          overflow: 'hidden',
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(255,255,255,0.4)',
         },
         variantStyles.container,
         animatedStyle,
         style,
       ]}
     >
+      <GlassSheen />
       {loading ? (
         <ActivityIndicator
           size="small"

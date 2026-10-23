@@ -60,7 +60,7 @@ export default function RootLayout(): React.JSX.Element {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#0A0A0A' },
+          contentStyle: { backgroundColor: '#101B21' },
           animation: 'slide_from_right',
         }}
       >

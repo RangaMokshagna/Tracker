@@ -1,9 +1,11 @@
+import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
 /**
  * STRIDE — Live Run Tracking Screen
  */
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   View,
   StatusBar,
@@ -124,6 +126,7 @@ export default function RunScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <LiquidBackdrop />
       <StatusBar barStyle="light-content" />
 
       {/* Countdown overlay */}
@@ -199,7 +202,7 @@ export default function RunScreen(): React.JSX.Element {
       <AutoPauseBanner visible={isAutoPaused && status === RunStatus.Active} />
 
       {/* Main Content Area */}
-      <View style={styles.contentContainer}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.contentContainer}>
         {activeTab === 'metrics' ? (
           <LiveRunDashboard stats={stats} unit={profile.unitPreference} />
         ) : (
@@ -211,7 +214,7 @@ export default function RunScreen(): React.JSX.Element {
             />
           </View>
         )}
-      </View>
+      </ScrollView>
 
       {/* One-Thumb Run Controls */}
       <View style={styles.controlsFooter}>
@@ -230,7 +233,7 @@ export default function RunScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#101B21',
     justifyContent: 'space-between',
   },
   topBar: {
@@ -253,12 +256,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(191, 255, 0, 0.1)',
+    backgroundColor: 'rgba(185, 232, 218, 0.1)',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(191, 255, 0, 0.25)',
+    borderColor: 'rgba(185, 232, 218, 0.25)',
   },
   liveDot: {
     width: 8,
@@ -267,7 +270,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.lime,
   },
   liveText: {
-    fontWeight: '800',
+    fontWeight: '500',
     letterSpacing: 1,
     fontSize: 10,
   },
@@ -291,13 +294,13 @@ const styles = StyleSheet.create({
     backgroundColor: palette.lime,
   },
   contentContainer: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
   },
   mapWrapper: {
     paddingHorizontal: 16,
   },
   controlsFooter: {
-    paddingBottom: 16,
+    paddingBottom: 110,
   },
 });
