@@ -1,16 +1,11 @@
 import { LiquidBackdrop } from '../../components/ui/LiquidBackdrop';
+import { RunHero } from '../../features/run/components/StartRunFlow';
 /**
  * STRIDE — Live Run Tracking Screen
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  View,
-  StatusBar,
-  TouchableOpacity,
-} from 'react-native';
+import { ScrollView, StyleSheet, View, StatusBar, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Text, GlassCard } from '../../components/ui';
@@ -27,7 +22,7 @@ import { LiveRunDashboard } from '../../features/run/components/LiveRunDashboard
 import { RunControls } from '../../features/run/components/RunControls';
 import { AutoPauseBanner } from '../../features/run/components/AutoPauseBanner';
 import { PostRunModal } from '../../features/run/components/PostRunModal';
-import { Map, Activity, ChevronLeft } from 'lucide-react-native';
+import { Map, Activity } from 'lucide-react-native';
 
 export default function RunScreen(): React.JSX.Element {
   const router = useRouter();
@@ -37,6 +32,9 @@ export default function RunScreen(): React.JSX.Element {
 
   const {
     status,
+    plannedMode,
+    targetValue,
+    targetTimeMinutes,
     countdownRemaining,
     stats,
     routePoints,
@@ -71,7 +69,7 @@ export default function RunScreen(): React.JSX.Element {
   // Active run lifecycle: start GPS and 1-second active timer
   useEffect(() => {
     if (status === RunStatus.Active) {
-      startLocationTracking();
+      if (useRunStore.getState().plannedMode !== 'treadmill') startLocationTracking();
 
       if (!timerRef.current) {
         timerRef.current = setInterval(() => {
@@ -110,7 +108,7 @@ export default function RunScreen(): React.JSX.Element {
     await recordCompletedRun(
       stats.distanceMeters,
       stats.durationSeconds,
-      stats.avgPaceSecondsPerKm
+      stats.avgPaceSecondsPerKm,
     );
     setShowPostModal(false);
     resetState();
@@ -123,6 +121,8 @@ export default function RunScreen(): React.JSX.Element {
   };
 
   const currentLocation = routePoints.length > 0 ? routePoints[routePoints.length - 1] : null;
+
+  if (status === RunStatus.Idle) return <RunHero />;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -143,22 +143,14 @@ export default function RunScreen(): React.JSX.Element {
 
       {/* Top Bar */}
       <View style={styles.topBar}>
-        {status === RunStatus.Idle ? (
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.7}
-          >
-            <ChevronLeft size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        ) : (
+        {
           <View style={styles.liveIndicator}>
             <View style={styles.liveDot} />
             <Text variant="caption" color="lime" style={styles.liveText}>
               {status === RunStatus.Paused ? 'PAUSED' : 'LIVE TRACKING'}
             </Text>
           </View>
-        )}
+        }
 
         {/* Tab switch (Metrics vs Map) during active or idle run */}
         <View style={styles.tabToggle}>
@@ -199,6 +191,14 @@ export default function RunScreen(): React.JSX.Element {
       </View>
 
       {/* Auto-pause banner */}
+      <Text
+        variant="caption"
+        color="textSecondary"
+        style={{ paddingHorizontal: 20, paddingBottom: 12 }}
+      >
+        {plannedMode.toUpperCase()} · {((targetValue || 0) / 1000).toFixed(0)} km goal ·{' '}
+        {targetTimeMinutes} min target
+      </Text>
       <AutoPauseBanner visible={isAutoPaused && status === RunStatus.Active} />
 
       {/* Main Content Area */}

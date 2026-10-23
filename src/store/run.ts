@@ -12,6 +12,8 @@ import { saveRun, type InsertRunParams } from '../services/sqlite';
 import { useAuthStore } from './auth';
 
 interface RunStore {
+  plannedMode: 'outdoor' | 'trail' | 'treadmill';
+  targetTimeMinutes: number;
   status: RunStatus;
   countdownRemaining: number;
   runId: string | null;
@@ -55,6 +57,8 @@ const INITIAL_STATS: RunStats = {
 };
 
 export const useRunStore = create<RunStore>((set, get) => ({
+  plannedMode: 'outdoor',
+  targetTimeMinutes: 30,
   status: RunStatus.Idle,
   countdownRemaining: 3,
   runId: null,

@@ -1,5 +1,7 @@
 import React, { createRef, useEffect, useMemo, useState } from 'react';
 import { Tabs } from 'expo-router';
+import { useRunStore } from '../../store/run';
+import { RunStatus } from '../../types/run';
 import { Keyboard, View } from 'react-native';
 import { BlurTargetView } from 'expo-blur';
 import type { BottomTabBarProps } from 'expo-router/tabs';
@@ -28,6 +30,7 @@ function StrideDock({
   blurTarget,
 }: BottomTabBarProps & { blurTarget?: React.RefObject<React.ComponentRef<typeof View> | null> }) {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const runStatus = useRunStore((state) => state.status);
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
     const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
@@ -55,7 +58,11 @@ function StrideDock({
       }),
     [state.routes],
   );
-  if (keyboardVisible) return null;
+  if (
+    keyboardVisible ||
+    (state.routes[state.index]?.name === 'run' && runStatus !== RunStatus.Idle)
+  )
+    return null;
   return (
     <LiquidGlassDock
       appearance="dark"
