@@ -25,9 +25,9 @@ function Screen() {
 }
 ```
 
-Place the dock after screen content, inside a screen-sized positioned parent and `SafeAreaProvider`. Reserve at least `76 + bottomSafeArea + 28` points below scroll content. Icons are render functions so the blue layer can use a filled variant. IDs must be unique. Keep tab arrays stable with a module constant or `useMemo`.
+Place the dock after screen content, inside a screen-sized positioned parent and `SafeAreaProvider`. Reserve at least `64 + bottomSafeArea + 28` points below scroll content. Icons are render functions so the blue layer can use a filled variant. IDs must be unique. Keep tab arrays stable with a module constant or `useMemo`.
 
-The selected capsule targets 94 by 64 points, with 28-point icons and 12-point labels. Its width adapts to text and compact screens. Extra horizontal end padding keeps the first and last capsule centered without shifting their icons. The outer height stays 76 points, so existing screen clearances remain valid.
+The selected capsule targets 68 by 52 points, with 21-point icons and 11-point labels. Its width adapts to text and compact screens. Extra horizontal end padding keeps the first and last capsule centered without shifting their icons. The outer height is 64 points, so existing screen clearances remain valid.
 
 ## Rendering and fallbacks
 

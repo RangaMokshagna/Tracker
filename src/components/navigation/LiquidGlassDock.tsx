@@ -46,11 +46,11 @@ export interface LiquidGlassDockProps {
 
 // TWEAK: physics, optical treatment, and colors are centralized here.
 const SPRING = { stiffness: 300, damping: 25, mass: 1 };
-const HEIGHT = 76;
+const HEIGHT = 64;
 const CONTENT_INSET = 6;
 // Extra end space keeps the wider capsule centered on the first and last icons.
-const HORIZONTAL_INSET = 22;
-const LENS_HEIGHT = 64;
+const HORIZONTAL_INSET = 14;
+const LENS_HEIGHT = 52;
 const BLUR = 55; // Native blur strength. Web blur and saturation are in the scoped CSS below.
 const clamp = (value: number, min: number, max: number) => {
   'worklet';
@@ -61,7 +61,7 @@ const clamp = (value: number, min: number, max: number) => {
 export function dockGeometry(width: number, count: number, index: number, labelWidth: number) {
   if (width <= 8 || count <= 0) return { center: 0, width: 0, cell: 0 };
   const cell = width / Math.max(1, count);
-  const lensWidth = Math.min(width, cell * 1.5, cell + 32, Math.max(94, labelWidth + 60));
+  const lensWidth = Math.min(width, cell * 1.25, cell + 16, Math.max(68, labelWidth + 30));
   const center = cell * (clamp(index, 0, count - 1) + 0.5);
   return { center, width: lensWidth, cell };
 }
@@ -203,7 +203,7 @@ function DockCell({
         style={[styles.cellContent, scaling]}
       >
         <Animated.View style={[styles.glyphLayer, inactiveStyle]}>
-          {tab.icon({ color: colors.inactive, size: 28, selected: false })}
+          {tab.icon({ color: colors.inactive, size: 21, selected: false })}
           <Text
             numberOfLines={1}
             maxFontSizeMultiplier={1.3}
@@ -214,7 +214,7 @@ function DockCell({
           </Text>
         </Animated.View>
         <Animated.View style={[styles.glyphLayer, activeStyle]}>
-          {tab.icon({ color: colors.active, size: 28, selected: true })}
+          {tab.icon({ color: colors.active, size: 21, selected: true })}
           <Text
             numberOfLines={1}
             maxFontSizeMultiplier={1.3}
@@ -245,7 +245,7 @@ export function LiquidGlassDock({
   const [labels, setLabels] = useState<Record<string, number>>({});
   const [focusId, setFocusId] = useState(activeId);
   const center = useSharedValue(0);
-  const lensWidth = useSharedValue(94);
+  const lensWidth = useSharedValue(68);
   const stretch = useSharedValue(1);
   const fade = useSharedValue(1);
   const initialized = useRef(false);
@@ -481,7 +481,7 @@ export function LiquidGlassDock({
       </View>
     </View>
   );
-  const dockWidth = Math.min(viewport.width - 32, 520);
+  const dockWidth = Math.min(viewport.width - 40, 440);
   return (
     <View
       pointerEvents="box-none"
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   },
   row: { height: LENS_HEIGHT, flexDirection: 'row', alignSelf: 'stretch', zIndex: 2 },
   cell: { height: LENS_HEIGHT, alignItems: 'center', justifyContent: 'center', minWidth: 0 },
-  cellContent: { width: '100%', height: 56 },
+  cellContent: { width: '100%', height: 44 },
   glyphLayer: {
     position: 'absolute',
     left: 0,
@@ -579,9 +579,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
+    gap: 3,
   },
-  label: { fontSize: 12, lineHeight: 17, letterSpacing: -0.1, fontWeight: '500' },
+  label: { fontSize: 11, lineHeight: 14, letterSpacing: -0.1, fontWeight: '500' },
   lens: {
     position: 'absolute',
     top: CONTENT_INSET - 1,

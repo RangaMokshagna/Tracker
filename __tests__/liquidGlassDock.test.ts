@@ -35,9 +35,9 @@ describe('liquid dock lens geometry', () => {
     for (const width of [248, 288, 358, 520]) {
       for (let index = 0; index < 5; index++) {
         const lens = dockGeometry(width, 5, index, 44);
-        expect(lens.center - lens.width / 2).toBeGreaterThanOrEqual(-16);
-        expect(lens.center + lens.width / 2).toBeLessThanOrEqual(width + 16);
-        expect(lens.width).toBeLessThanOrEqual(lens.cell * 1.5);
+        expect(lens.center - lens.width / 2).toBeGreaterThanOrEqual(-8);
+        expect(lens.center + lens.width / 2).toBeLessThanOrEqual(width + 8);
+        expect(lens.width).toBeLessThanOrEqual(lens.cell * 1.25);
         expect(lens.center).toBe(lens.cell * (index + 0.5));
         expect(dockCoverage(lens.center, lens.cell, index)).toBe(1);
       }
@@ -45,7 +45,7 @@ describe('liquid dock lens geometry', () => {
   });
   it('adapts to measured text instead of hardcoding a single capsule width', () => {
     expect(dockGeometry(358, 5, 4, 44).width).toBeGreaterThan(dockGeometry(358, 5, 0, 26).width);
-    expect(dockGeometry(358, 5, 2, 500).width).toBeLessThanOrEqual((358 / 5) * 1.5);
+    expect(dockGeometry(358, 5, 2, 500).width).toBeLessThanOrEqual((358 / 5) * 1.25);
   });
   it('snaps to the nearest tab and clamps drags beyond the dock', () => {
     expect(nearestDockTab(-100, 350, 5)).toBe(0);
