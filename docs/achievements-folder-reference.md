@@ -1,0 +1,5 @@
+# Reference folder
+
+Asset: `assets/achievements-folder-exact.png`. Created with the built-in image generation tool from the second user-supplied reference and used by the Profile achievements button. The original stack artwork is retained as a separate asset.
+
+Prompt: Edit target is ONLY the SECOND attached image: the glossy teal ACHIEVEMENTS folder. The FIRST image is the unwanted current version and must NOT influence output. Preserve the second image as closely as possible: same two-panel file folder silhouette, raised left tab on front, broad upper back panel, same tilted perspective and rounded corners, same bright mint white rim, rich translucent turquoise glass with soft cloudy reflections, same circular trophy medallion on lower left and exact spaced uppercase text ACHIEVEMENTS along lower front. No individual cards poking out, no flame/footsteps, no stride wordmark. Keep composition, proportions, material, highlights, typography and colors of second image. Isolate on real transparent alpha background with small margin around the whole intact folder. This is a faithful asset reproduction for the user's own app, not a redesign or a scene.

@@ -26,7 +26,7 @@ export function BadgeGlyph({
   return <Icon size={size} color={color} strokeWidth={1.6} />;
 }
 
-/** Layered cards and a translucent vector folder use the same palette as the live UI. */
+/** Transparent glass folder artwork matched to the supplied achievements reference. */
 function FolderArtwork() {
   return (
     <View
@@ -36,7 +36,7 @@ function FolderArtwork() {
       importantForAccessibility="no-hide-descendants"
     >
       <Image
-        source={require('../../../../assets/achievements-folder-glass.png')}
+        source={require('../../../../assets/achievements-folder-exact.png')}
         resizeMode="contain"
         style={styles.folderImage}
         accessible={false}
