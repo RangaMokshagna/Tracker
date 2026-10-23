@@ -96,16 +96,15 @@ export function SlideButton({
 }) {
   const { colors, isDark } = useTheme();
   const [width, setWidth] = useState(0);
-  const [ready, setReady] = useState(false);
   const position = useSharedValue(0);
   const reduced = useReducedMotion();
   const completed = useRef(false);
+  const didDrag = useRef(false);
   const travel = Math.max(0, width - 64);
   useFocusEffect(
     useCallback(() => {
       completed.current = false;
       position.set(0);
-      setReady(false);
     }, [position]),
   );
   const finish = () => {
@@ -114,26 +113,34 @@ export function SlideButton({
     tick();
     onComplete();
   };
-  // PanResponder stores callbacks; completion reads its ref only after user input.
+  const clearDragFlag = () => {
+    // Let Pressable receive the release first, then make the next tap usable.
+    setTimeout(() => {
+      didDrag.current = false;
+    }, 0);
+  };
+  // The responder belongs to the entire track so the control works when the
+  // user starts a drag anywhere on the button, not only on the small thumb.
+  // A simple tap is also a deliberate, accessible way to continue.
   // eslint-disable-next-line react-hooks/refs
   const pan = PanResponder.create({
     onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponderCapture: (_, gesture) =>
       Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy),
     onPanResponderMove: (_, gesture) => {
+      if (Math.abs(gesture.dx) > 6) didDrag.current = true;
       position.set(Math.max(0, Math.min(travel, gesture.dx)));
-      setReady(gesture.dx >= travel * 0.8);
     },
     onPanResponderRelease: (_, gesture) => {
       if (travel && gesture.dx >= travel * 0.8) finish();
       else {
         position.set(reduced ? 0 : withSpring(0, SPRING));
-        setReady(false);
       }
+      clearDragFlag();
     },
     onPanResponderTerminate: () => {
       position.set(reduced ? 0 : withSpring(0, SPRING));
-      setReady(false);
+      clearDragFlag();
     },
   });
   const thumb = useAnimatedStyle(() => ({
@@ -161,25 +168,27 @@ export function SlideButton({
     ),
   }));
   return (
-    <View
+    <Pressable
       accessible
-      accessibilityRole="adjustable"
+      accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityHint="Swipe up to confirm, or drag the thumb to the right"
-      accessibilityValue={{ min: 0, max: 100, now: ready ? 100 : 0 }}
-      accessibilityActions={[
-        { name: "increment", label: "Confirm" },
-        { name: "activate", label: "Confirm" },
-      ]}
+      accessibilityHint="Tap to continue, or drag right to confirm"
+      accessibilityActions={[{ name: "activate", label: "Confirm" }]}
       onAccessibilityAction={(event) => {
-        if (["activate", "increment"].includes(event.nativeEvent.actionName))
-          finish();
+        if (event.nativeEvent.actionName === "activate") finish();
+      }}
+      onPress={() => {
+        // Pressable can emit a press after a PanResponder release. Do not turn
+        // an incomplete drag into a confirmation; a genuine tap still works.
+        if (!didDrag.current) finish();
+        didDrag.current = false;
       }}
       onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
       style={[
         s.slider,
         { backgroundColor: colors.glass, borderColor: colors.glassBorder },
       ]}
+      {...pan.panHandlers}
     >
       <Animated.View pointerEvents="none" style={[s.sliderFill, fill]}>
         <Svg
@@ -232,17 +241,12 @@ export function SlideButton({
           <WaveChevron key={delay} delay={delay} />
         ))}
       </View>
-      <Animated.View style={[s.thumb, thumb]} {...pan.panHandlers}>
-        <Pressable
-          accessible={false}
-          accessibilityElementsHidden
-          onPress={finish}
-          style={s.thumbPress}
-        >
+      <Animated.View pointerEvents="none" style={[s.thumb, thumb]}>
+        <View style={s.thumbPress}>
           <ChevronRight color="#FFFFFF" size={23} />
-        </Pressable>
+        </View>
       </Animated.View>
-    </View>
+    </Pressable>
   );
 }
 
